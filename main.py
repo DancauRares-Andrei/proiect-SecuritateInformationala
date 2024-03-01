@@ -32,6 +32,7 @@ class MainWindow(QtWidgets.QDialog):
         self.ui.pushButton_actualizare_cheie.clicked.connect(self.update_key_input_window)
         self.ui.pushButton_adaugare_algoritm.clicked.connect(self.add_algo_input_window)
         self.ui.pushButton_stergere_algoritm.clicked.connect(self.pushButton_stergere_algoritm_clicked)
+        self.ui.pushButton_modificare_algoritm.clicked.connect(self.update_algo_input_window)
     def pushButton_stergere_cheie_clicked(self):
         try:
             selected_item = self.ui.listWidget_chei.currentItem()
@@ -257,7 +258,126 @@ class MainWindow(QtWidgets.QDialog):
             else:
                  QMessageBox.warning(self, "Avertisment", "Nu ați selectat niciun algoritm!", QMessageBox.Ok)   
         except IntegrityError:
-            QMessageBox.warning(self, "Avertisment", "Nu pot șterge algoritmul pentru că are asociate fișiere!", QMessageBox.Ok)      
+            QMessageBox.warning(self, "Avertisment", "Nu pot șterge algoritmul pentru că are asociate fișiere!", QMessageBox.Ok)
+    def update_algo_input_window(self):
+        #De modificat din create in update
+        selected_item = self.ui.listWidget_algoritmi.currentItem()
+        if selected_item:
+            componente=selected_item.text().split(" ")
+            nume_vechi=componente[0]
+            framework_vechi=componente[1]
+            cheie_criptare_veche=componente[2]
+            if len(componente)==4:
+                cheie_decriptare_veche=componente[3]
+            else:
+                cheie_decriptare_veche=componente[3]
+            algo
+            framework=self.ui.listWidget_framework.currentItem()
+            cheie=self.ui.listWidget_chei.currentItem()
+            if framework and cheie:
+                framework=framework.text()
+                cheie=cheie.text()
+                nume, ok1 = QInputDialog.getText(self, 'Numele algoritmului de criptare', 'Introduceți noul nume al algoritmului de criptare:')
+                if ok1:
+                    if framework=="OpenSSL":
+                        if nume.upper() in OPENSSL_SYM and asimetrica(cheie)==False:
+                            framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
+                            cheie_e=Chei.get((Chei.CheieCriptare == cheie)&(Chei.CheieDecriptare == cheie))
+                            algo=Algoritmi.create(
+                            Nume = nume,
+                            CheieID = cheie_e,
+                            FrameworkID = framework_e
+                            )
+                            self.init_list_widget_algo()
+                            QMessageBox.information(self, "Chei introduse", f"S-a adaugat algoritmul cu succes!", QMessageBox.Ok) 
+                        elif nume.upper() in OPENSSL_ASYM and asimetrica(cheie)==True:
+                            framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
+                            cheieCript,cheieDecript=cheie.split(" ")
+                            cheie_e=Chei.get((Chei.CheieCriptare==cheieCript) & (Chei.CheieDecriptare==cheieDecript))
+                            algo=Algoritmi.create(
+                            Nume = nume,
+                            CheieID = cheie_e,
+                            FrameworkID = framework_e
+                            )
+                            self.init_list_widget_algo()
+                        else:
+                             QMessageBox.warning(self, "Avertisment", "Algoritm nesuportat sau nepotrivire între algoritm și cheie!", QMessageBox.Ok)
+                    elif framework=="LibreSSL":
+                        if nume.upper() in LIBRESSL_SYM and asimetrica(cheie)==False:
+                            framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
+                            cheie_e=Chei.get((Chei.CheieCriptare == cheie)&(Chei.CheieDecriptare == cheie))
+                            algo=Algoritmi.create(
+                            Nume = nume,
+                            CheieID = cheie_e,
+                            FrameworkID = framework_e
+                            )
+                            self.init_list_widget_algo()
+                            QMessageBox.information(self, "Chei introduse", f"S-a adaugat algoritmul cu succes!", QMessageBox.Ok) 
+                        elif nume.upper() in LIBRESSL_ASYM and asimetrica(cheie)==True:
+                            framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
+                            cheieCript,cheieDecript=cheie.split(" ")
+                            cheie_e=Chei.get((Chei.CheieCriptare==cheieCript) & (Chei.CheieDecriptare==cheieDecript))
+                            algo=Algoritmi.create(
+                            Nume = nume,
+                            CheieID = cheie_e,
+                            FrameworkID = framework_e
+                            )
+                            self.init_list_widget_algo()
+                        else:
+                             QMessageBox.warning(self, "Avertisment", "Algoritm nesuportat sau nepotrivire între algoritm și cheie!", QMessageBox.Ok)         
+                    elif framework=="Themis":
+                        if nume.upper() in THEMIS_SYM and asimetrica(cheie)==False:
+                            framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
+                            cheie_e=Chei.get((Chei.CheieCriptare == cheie)&(Chei.CheieDecriptare == cheie))
+                            algo=Algoritmi.create(
+                            Nume = nume,
+                            CheieID = cheie_e,
+                            FrameworkID = framework_e
+                            )
+                            self.init_list_widget_algo()
+                            QMessageBox.information(self, "Chei introduse", f"S-a adaugat algoritmul cu succes!", QMessageBox.Ok) 
+                        elif nume.upper() in THEMIS_ASYM and asimetrica(cheie)==True:
+                            framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
+                            cheieCript,cheieDecript=cheie.split(" ")
+                            cheie_e=Chei.get((Chei.CheieCriptare==cheieCript) & (Chei.CheieDecriptare==cheieDecript))
+                            algo=Algoritmi.create(
+                            Nume = nume,
+                            CheieID = cheie_e,
+                            FrameworkID = framework_e
+                            )
+                            self.init_list_widget_algo()
+                        else:
+                             QMessageBox.warning(self, "Avertisment", "Algoritm nesuportat sau nepotrivire între algoritm și cheie!", QMessageBox.Ok)         
+                    elif framework=="GnuTLS":
+                        if nume.upper() in GNUTLS_SYM and asimetrica(cheie)==False:
+                            framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
+                            cheie_e=Chei.get((Chei.CheieCriptare == cheie)&(Chei.CheieDecriptare == cheie))
+                            algo=Algoritmi.create(
+                            Nume = nume,
+                            CheieID = cheie_e,
+                            FrameworkID = framework_e
+                            )
+                            self.init_list_widget_algo()
+                            QMessageBox.information(self, "Chei introduse", f"S-a adaugat algoritmul cu succes!", QMessageBox.Ok) 
+                        elif nume.upper() in GNUTLS_ASYM and asimetrica(cheie)==True:
+                            framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
+                            cheieCript,cheieDecript=cheie.split(" ")
+                            cheie_e=Chei.get((Chei.CheieCriptare==cheieCript) & (Chei.CheieDecriptare==cheieDecript))
+                            algo=Algoritmi.create(
+                            Nume = nume,
+                            CheieID = cheie_e,
+                            FrameworkID = framework_e
+                            )
+                            self.init_list_widget_algo()
+                        else:
+                             QMessageBox.warning(self, "Avertisment", "Algoritm nesuportat sau nepotrivire între algoritm și cheie!", QMessageBox.Ok)         
+                             
+                    else:
+                        QMessageBox.warning(self, "Avertisment", "Algoritm nesuportat sau nepotrivire între algoritm și cheie!", QMessageBox.Ok) 
+            else:
+                QMessageBox.warning(self, "Avertisment", "Trebuie selectat un framework și o cheie!", QMessageBox.Ok)  
+        else:
+             QMessageBox.warning(self, "Avertisment", "Nu a fost selectat niciun algoritm de modificat!", QMessageBox.Ok)           
 def main():
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
