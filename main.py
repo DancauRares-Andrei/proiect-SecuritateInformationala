@@ -1,6 +1,8 @@
 import sys
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QMessageBox, QInputDialog
+from PyQt5.QtWidgets import QMessageBox, QInputDialog, QFileDialog
+import subprocess
+import hashlib
 from db import *
 from main_window_ui import Ui_Dialog 
 
@@ -19,6 +21,12 @@ def asimetrica(cheie):
         return True
     else:
         return False
+def calculate_md5(file_path):
+    md5_hash = hashlib.md5()
+    with open(file_path, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            md5_hash.update(chunk)
+    return md5_hash.hexdigest()
 class MainWindow(QtWidgets.QDialog):
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -27,12 +35,14 @@ class MainWindow(QtWidgets.QDialog):
         self.init_list_widget_cheie()
         self.init_list_widget_framework()
         self.init_list_widget_algo()
+        self.init_list_widget_file()
         self.ui.pushButton_stergere_cheie.clicked.connect(self.pushButton_stergere_cheie_clicked)
         self.ui.pushButton_add_cheie.clicked.connect(self.open_key_input_window)
         self.ui.pushButton_actualizare_cheie.clicked.connect(self.update_key_input_window)
         self.ui.pushButton_adaugare_algoritm.clicked.connect(self.add_algo_input_window)
         self.ui.pushButton_stergere_algoritm.clicked.connect(self.pushButton_stergere_algoritm_clicked)
         self.ui.pushButton_modificare_algoritm.clicked.connect(self.update_algo_input_window)
+        self.ui.pushButton_criptare.clicked.connect(self.encrypt_file)
     def pushButton_stergere_cheie_clicked(self):
         try:
             selected_item = self.ui.listWidget_chei.currentItem()
@@ -268,7 +278,7 @@ class MainWindow(QtWidgets.QDialog):
             if len(componente)==4:
                 cheie_decriptare_veche=componente[3]
             else:
-                cheie_decriptare_veche=componente[3]           
+                cheie_decriptare_veche=componente[2]           
             framework_e=Frameworkuri.get(Frameworkuri.Nume == framework_vechi)
             cheie_e=Chei.get((Chei.CheieCriptare == cheie_criptare_veche)&(Chei.CheieDecriptare == cheie_decriptare_veche))
             algoritm_vechi=Algoritmi.get((Algoritmi.CheieID==cheie_e) & (Algoritmi.FrameworkID==framework_e) & (Algoritmi.Nume == componente[0]))
@@ -369,7 +379,56 @@ class MainWindow(QtWidgets.QDialog):
             else:
                 QMessageBox.warning(self, "Avertisment", "Trebuie selectat un framework și o cheie!", QMessageBox.Ok)  
         else:
-             QMessageBox.warning(self, "Avertisment", "Nu a fost selectat niciun algoritm de modificat!", QMessageBox.Ok)           
+             QMessageBox.warning(self, "Avertisment", "Nu a fost selectat niciun algoritm de modificat!", QMessageBox.Ok)  
+    def encrypt_file(self):
+        selected_item = self.ui.listWidget_algoritmi.currentItem()
+        if selected_item:
+            componente=selected_item.text().split(" ")
+            nume=componente[0]
+            framework=componente[1]
+            cheie_criptare=componente[2]
+            if len(componente)==4:
+                cheie_decriptare=componente[3]
+            else:
+                cheie_decriptare=componente[2]           
+            framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
+            cheie_e=Chei.get((Chei.CheieCriptare == cheie_criptare)&(Chei.CheieDecriptare == cheie_decriptare))
+            algoritm_vechi=Algoritmi.get((Algoritmi.CheieID==cheie_e) & (Algoritmi.FrameworkID==framework_e) & (Algoritmi.Nume == componente[0]))
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog
+            file_dialog = QFileDialog()
+            file_dialog.setFileMode(QFileDialog.ExistingFile)
+            if file_dialog.exec_():
+                file_path = file_dialog.selectedFiles()[0]
+                file_hash=calculate_md5(file_path)
+                if framework=="OpenSSL":
+                    if nume=="AES128":
+                        openssl_command = [
+                            "openssl", "enc", "-aes128", "-pbkdf2",
+                            "-in", file_path,
+                            "-out", file_path,
+                            "-pass", "pass:"+cheie_criptare
+                        ]
+                    elif nume=="AES-256-CBC":
+                        pass
+                    elif nume=="AES256":
+                        pass
+                    completed_process = subprocess.run(openssl_command, check=True)
+                    if completed_process.returncode != 0:
+                        QMessageBox.warning(self, "Avertisment", f"A apărut o eroare la criptarea fișierului! Cod:{completed_process.returncode}", QMessageBox.Ok)
+                        return
+            file_e=Fisiere.create(
+            AlgoritmID = algoritm_e,
+            Cale = file_path,
+            Criptat = True,
+            Timp = 0,
+            Hash = str(file_hash),
+            UsedRAM = "IN LUCRU"
+            )          
+        else:
+             QMessageBox.warning(self, "Avertisment", "Nu a fost selectat niciun algoritm de criptare!", QMessageBox.Ok)
+    def self.init_list_widget_file(self):
+        pass                      
 def main():
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
