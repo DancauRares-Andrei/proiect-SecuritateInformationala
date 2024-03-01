@@ -6,7 +6,7 @@ import hashlib
 from db import *
 from main_window_ui import Ui_Dialog 
 
-OPENSSL_SYM = ["AES128", "AES-256-CBC", "AES256"]
+OPENSSL_SYM = ["AES128", "AES192", "AES256"]
 LIBRESSL_SYM = ["AES128", "AES192", "AES256", "Camellia128", "Camellia192", "Camellia256"]
 THEMIS_SYM = ["AES128", "AES192", "AES256", "ChaCha20", "Salsa20"]
 GNUTLS_SYM = ["AES128", "AES192", "AES256", "Camellia128", "Camellia192", "Camellia256", "SEED", "3DES"]
@@ -393,7 +393,7 @@ class MainWindow(QtWidgets.QDialog):
                 cheie_decriptare=componente[2]           
             framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
             cheie_e=Chei.get((Chei.CheieCriptare == cheie_criptare)&(Chei.CheieDecriptare == cheie_decriptare))
-            algoritm_vechi=Algoritmi.get((Algoritmi.CheieID==cheie_e) & (Algoritmi.FrameworkID==framework_e) & (Algoritmi.Nume == componente[0]))
+            algoritm_e=Algoritmi.get((Algoritmi.CheieID==cheie_e) & (Algoritmi.FrameworkID==framework_e) & (Algoritmi.Nume == componente[0]))
             options = QFileDialog.Options()
             options |= QFileDialog.DontUseNativeDialog
             file_dialog = QFileDialog()
@@ -409,26 +409,48 @@ class MainWindow(QtWidgets.QDialog):
                             "-out", file_path,
                             "-pass", "pass:"+cheie_criptare
                         ]
-                    elif nume=="AES-256-CBC":
-                        pass
+                    elif nume=="AES192":
+                        openssl_command = [
+                            "openssl", "enc", "-aes192", "-pbkdf2",
+                            "-in", file_path,
+                            "-out", file_path,
+                            "-pass", "pass:"+cheie_criptare
+                        ]
                     elif nume=="AES256":
-                        pass
+                        openssl_command = [
+                            "openssl", "enc", "-aes256", "-pbkdf2",
+                            "-in", file_path,
+                            "-out", file_path,
+                            "-pass", "pass:"+cheie_criptare
+                        ]
                     completed_process = subprocess.run(openssl_command, check=True)
                     if completed_process.returncode != 0:
                         QMessageBox.warning(self, "Avertisment", f"A apărut o eroare la criptarea fișierului! Cod:{completed_process.returncode}", QMessageBox.Ok)
                         return
-            file_e=Fisiere.create(
-            AlgoritmID = algoritm_e,
-            Cale = file_path,
-            Criptat = True,
-            Timp = 0,
-            Hash = str(file_hash),
-            UsedRAM = "IN LUCRU"
-            )          
+                    file_e=Fisiere.create(
+                    AlgoritmID = algoritm_e,
+                    Cale = file_path,
+                    Criptat = True,
+                    Timp = 0,
+                    Hash = str(file_hash),
+                    UsedRAM = "IN LUCRU"
+                    )
+                    self.init_list_widget_file()         
         else:
              QMessageBox.warning(self, "Avertisment", "Nu a fost selectat niciun algoritm de criptare!", QMessageBox.Ok)
-    def self.init_list_widget_file(self):
-        pass                      
+    def init_list_widget_file(self):
+        self.ui.listWidget_fisiere.clear()
+        values = [] 
+        fisiere=Fisiere.select()
+        for fisier in fisiere:
+            current_val=fisier.Cale.split("/")[-1]+" "+fisier.AlgoritmID.Nume+" "+fisier.AlgoritmID.FrameworkID.Nume+" "
+            if(fisier.AlgoritmID.CheieID.CheieCriptare==fisier.AlgoritmID.CheieID.CheieDecriptare):
+                current_val+=fisier.AlgoritmID.CheieID.CheieCriptare+" "
+            else:
+                current_val+=fisier.AlgoritmID.CheieID.CheieCriptare+" "+fisier.AlgoritmID.CheieID.CheieDecriptare+" "
+            current_val+=str(fisier.Criptat)+" "+str(fisier.Timp)+"ms MD5:"+fisier.Hash+" "+fisier.UsedRAM+" "+fisier.Cale
+            values.append(current_val)
+        self.ui.listWidget_fisiere.addItems(values)                      
 def main():
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()

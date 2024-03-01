@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>885</width>
+    <width>1081</width>
     <height>510</height>
    </rect>
   </property>
@@ -16,7 +16,7 @@
   <widget class="QLabel" name="label_cheie">
    <property name="geometry">
     <rect>
-     <x>0</x>
+     <x>30</x>
      <y>10</y>
      <width>161</width>
      <height>20</height>
@@ -26,25 +26,11 @@
     <string>Chei/Perechi disponibile:</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_adaugare_algoritm">
-   <property name="geometry">
-    <rect>
-     <x>330</x>
-     <y>240</y>
-     <width>241</width>
-     <height>61</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Adăugare algoritm nou suportat cu
-framework-ul și cheia selectate</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="pushButton_evaluare_performante">
    <property name="geometry">
     <rect>
-     <x>610</x>
-     <y>480</y>
+     <x>790</x>
+     <y>460</y>
      <width>251</width>
      <height>28</height>
     </rect>
@@ -56,8 +42,8 @@ framework-ul și cheia selectate</string>
   <widget class="QListWidget" name="listWidget_framework">
    <property name="geometry">
     <rect>
-     <x>610</x>
-     <y>330</y>
+     <x>790</x>
+     <y>310</y>
      <width>181</width>
      <height>141</height>
     </rect>
@@ -72,8 +58,8 @@ framework-ul și cheia selectate</string>
   <widget class="QLabel" name="labelAlgo">
    <property name="geometry">
     <rect>
-     <x>310</x>
-     <y>20</y>
+     <x>530</x>
+     <y>10</y>
      <width>131</width>
      <height>16</height>
     </rect>
@@ -85,8 +71,8 @@ framework-ul și cheia selectate</string>
   <widget class="QLabel" name="label_fisier">
    <property name="geometry">
     <rect>
-     <x>620</x>
-     <y>20</y>
+     <x>10</x>
+     <y>250</y>
      <width>131</width>
      <height>16</height>
     </rect>
@@ -98,9 +84,9 @@ framework-ul și cheia selectate</string>
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>0</x>
-     <y>240</y>
-     <width>317</width>
+     <x>280</x>
+     <y>60</y>
+     <width>232</width>
      <height>141</height>
     </rect>
    </property>
@@ -122,7 +108,8 @@ framework-ul și cheia selectate</string>
     <item>
      <widget class="QPushButton" name="pushButton_stergere_cheie">
       <property name="text">
-       <string>Ștergere cheie/pereche selectată din baza de date</string>
+       <string>Ștergere cheie/pereche selectată
+ din baza de date</string>
       </property>
      </widget>
     </item>
@@ -131,7 +118,7 @@ framework-ul și cheia selectate</string>
   <widget class="QListWidget" name="listWidget_chei">
    <property name="geometry">
     <rect>
-     <x>0</x>
+     <x>20</x>
      <y>40</y>
      <width>256</width>
      <height>192</height>
@@ -141,7 +128,7 @@ framework-ul și cheia selectate</string>
   <widget class="QListWidget" name="listWidget_algoritmi">
    <property name="geometry">
     <rect>
-     <x>310</x>
+     <x>530</x>
      <y>40</y>
      <width>256</width>
      <height>192</height>
@@ -151,9 +138,9 @@ framework-ul și cheia selectate</string>
   <widget class="QListWidget" name="listWidget_fisiere">
    <property name="geometry">
     <rect>
-     <x>620</x>
-     <y>40</y>
-     <width>256</width>
+     <x>10</x>
+     <y>280</y>
+     <width>771</width>
      <height>192</height>
     </rect>
    </property>
@@ -161,8 +148,8 @@ framework-ul și cheia selectate</string>
   <widget class="QLabel" name="label_framework">
    <property name="geometry">
     <rect>
-     <x>610</x>
-     <y>310</y>
+     <x>790</x>
+     <y>290</y>
      <width>171</width>
      <height>20</height>
     </rect>
@@ -174,8 +161,8 @@ framework-ul și cheia selectate</string>
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>620</x>
-     <y>240</y>
+     <x>800</x>
+     <y>220</y>
      <width>168</width>
      <height>64</height>
     </rect>
@@ -197,31 +184,39 @@ framework-ul și cheia selectate</string>
     </item>
    </layout>
   </widget>
-  <widget class="QPushButton" name="pushButton_modificare_algoritm">
+  <widget class="QWidget" name="">
    <property name="geometry">
     <rect>
-     <x>330</x>
-     <y>310</y>
-     <width>241</width>
-     <height>61</height>
+     <x>800</x>
+     <y>60</y>
+     <width>250</width>
+     <height>113</height>
     </rect>
    </property>
-   <property name="text">
-    <string>Modificare parametri algoritm selectat</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton_stergere_algoritm">
-   <property name="geometry">
-    <rect>
-     <x>330</x>
-     <y>380</y>
-     <width>241</width>
-     <height>61</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Ștergere algoritm selectat</string>
-   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_3">
+    <item>
+     <widget class="QPushButton" name="pushButton_adaugare_algoritm">
+      <property name="text">
+       <string>Adăugare algoritm nou suportat cu
+framework-ul și cheia selectate</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton_modificare_algoritm">
+      <property name="text">
+       <string>Modificare parametri algoritm selectat</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton_stergere_algoritm">
+      <property name="text">
+       <string>Ștergere algoritm selectat</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <tabstops>
