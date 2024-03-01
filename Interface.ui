@@ -26,7 +26,7 @@
     <string>Chei/Perechi disponibile:</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_3">
+  <widget class="QPushButton" name="pushButton_adaugare_algoritm">
    <property name="geometry">
     <rect>
      <x>330</x>
@@ -40,24 +40,11 @@
 framework-ul și cheia selectate</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_criptare">
+  <widget class="QPushButton" name="pushButton_evaluare_performante">
    <property name="geometry">
     <rect>
-     <x>620</x>
-     <y>240</y>
-     <width>171</width>
-     <height>28</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Criptare fișier</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton_5">
-   <property name="geometry">
-    <rect>
-     <x>310</x>
-     <y>470</y>
+     <x>610</x>
+     <y>480</y>
      <width>251</width>
      <height>28</height>
     </rect>
@@ -69,8 +56,8 @@ framework-ul și cheia selectate</string>
   <widget class="QListWidget" name="listWidget_framework">
    <property name="geometry">
     <rect>
-     <x>350</x>
-     <y>320</y>
+     <x>610</x>
+     <y>330</y>
      <width>181</width>
      <height>141</height>
     </rect>
@@ -174,8 +161,8 @@ framework-ul și cheia selectate</string>
   <widget class="QLabel" name="label_framework">
    <property name="geometry">
     <rect>
-     <x>350</x>
-     <y>300</y>
+     <x>610</x>
+     <y>310</y>
      <width>171</width>
      <height>20</height>
     </rect>
@@ -184,27 +171,66 @@ framework-ul și cheia selectate</string>
     <string>Framework-uri disponibile:</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_criptare_2">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>610</x>
-     <y>280</y>
-     <width>171</width>
-     <height>28</height>
+     <x>620</x>
+     <y>240</y>
+     <width>168</width>
+     <height>64</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QPushButton" name="pushButton_criptare">
+      <property name="text">
+       <string>Criptare fișier</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton_decriptare">
+      <property name="text">
+       <string>Decriptare fișier selectat</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QPushButton" name="pushButton_modificare_algoritm">
+   <property name="geometry">
+    <rect>
+     <x>330</x>
+     <y>310</y>
+     <width>241</width>
+     <height>61</height>
     </rect>
    </property>
    <property name="text">
-    <string>Decriptare fișier selectat</string>
+    <string>Modificare parametri algoritm selectat</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_stergere_algoritm">
+   <property name="geometry">
+    <rect>
+     <x>330</x>
+     <y>380</y>
+     <width>241</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Ștergere algoritm selectat</string>
    </property>
   </widget>
  </widget>
  <tabstops>
   <tabstop>pushButton_add_cheie</tabstop>
   <tabstop>pushButton_stergere_cheie</tabstop>
-  <tabstop>pushButton_3</tabstop>
+  <tabstop>pushButton_adaugare_algoritm</tabstop>
   <tabstop>pushButton_criptare</tabstop>
   <tabstop>listWidget_framework</tabstop>
-  <tabstop>pushButton_5</tabstop>
+  <tabstop>pushButton_evaluare_performante</tabstop>
  </tabstops>
  <resources/>
  <connections/>

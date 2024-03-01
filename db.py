@@ -31,3 +31,10 @@ class Fisiere(Model):
 db.connect()
 if not Chei.table_exists() or not Frameworkuri.table_exists() or not Algoritmi.table_exists() or not Fisiere.table_exists():
     db.create_tables([Chei,Frameworkuri,Algoritmi,Fisiere])
+    try:
+        framework=Frameworkuri.get(Frameworkuri.Nume == "OpenSSL")
+    except Frameworkuri.DoesNotExist:
+        Frameworkuri.create(Nume="OpenSSL")
+        Frameworkuri.create(Nume="LibreSSL")
+        Frameworkuri.create(Nume="Themis")
+        Frameworkuri.create(Nume="GnuTLS")
