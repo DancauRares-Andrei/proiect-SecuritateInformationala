@@ -3,6 +3,8 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox, QInputDialog, QFileDialog
 import subprocess
 import hashlib
+import shutil
+import os
 from db import *
 from main_window_ui import Ui_Dialog 
 
@@ -32,6 +34,9 @@ def algoritm_asimetric(nume):
         return True
     else:
         return False 
+def copiaza_continut(fisier_sursa, fisier_destinatie):
+    shutil.copy(fisier_sursa, fisier_destinatie)
+    os.remove(fisier_sursa)
 class MainWindow(QtWidgets.QDialog):
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -414,27 +419,28 @@ class MainWindow(QtWidgets.QDialog):
                         openssl_command = [
                             "openssl", "enc", "-aes128", "-pbkdf2",
                             "-in", file_path,
-                            "-out", file_path,
+                            "-out", file_path+'.temp',
                             "-pass", "pass:"+cheie_criptare
                         ]
                     elif nume=="AES192":
                         openssl_command = [
                             "openssl", "enc", "-aes192", "-pbkdf2",
                             "-in", file_path,
-                            "-out", file_path,
+                            "-out", file_path+'.temp',
                             "-pass", "pass:"+cheie_criptare
                         ]
                     elif nume=="AES256":
                         openssl_command = [
                             "openssl", "enc", "-aes256", "-pbkdf2",
                             "-in", file_path,
-                            "-out", file_path,
+                            "-out", file_path+'.temp',
                             "-pass", "pass:"+cheie_criptare
                         ]
                     completed_process = subprocess.run(openssl_command, check=True)
                     if completed_process.returncode != 0:
                         QMessageBox.warning(self, "Avertisment", f"A apărut o eroare la criptarea fișierului! Cod:{completed_process.returncode}", QMessageBox.Ok)
                         return
+                    copiaza_continut(file_path+'.temp',file_path)
                     file_e=Fisiere.create(
                     AlgoritmID = algoritm_e,
                     Cale = file_path,
@@ -489,7 +495,70 @@ class MainWindow(QtWidgets.QDialog):
         fisier_e.delete_instance()
         self.init_list_widget_file()
     def decrypt_file(self):
-        pass
+        try:
+            selected_item = self.ui.listWidget_fisiere.currentItem()
+            if not selected_item:
+                QMessageBox.warning(self, "Avertisment", "Nu a fost selectat niciun fișier de șters!", QMessageBox.Ok)
+                return
+            componente=selected_item.text().split(" ")
+            nume_algoritm=componente[1]
+            framework=componente[2]
+            cheie_criptare=componente[3]
+            if algoritm_asimetric(nume_algoritm):
+                cheie_decriptare=componente[4]
+                criptat=True if componente[5]=="True" else False
+                timp=int(componente[6][:-3])
+                hash_file=componente[7][4:]
+                used_ram=componente[8]
+                file_path=" ".join(componente[9:])
+            else:
+                cheie_decriptare=componente[3]
+                criptat=True if componente[4]=="True" else False
+                timp=int(componente[5][:-2])
+                hash_file=componente[6][4:]
+                used_ram=componente[7]
+                file_path=" ".join(componente[8:])
+            if criptat==False:
+                QMessageBox.warning(self, "Avertisment", "Fișierul este deja decriptat!", QMessageBox.Ok)
+                return
+            framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
+            cheie_e=Chei.get((Chei.CheieCriptare == cheie_criptare)&(Chei.CheieDecriptare == cheie_decriptare))
+            algoritm_e=Algoritmi.get((Algoritmi.CheieID==cheie_e) & (Algoritmi.FrameworkID==framework_e) & (Algoritmi.Nume == nume_algoritm))
+            fisier_e=Fisiere.get((Fisiere.AlgoritmID==algoritm_e) & (Fisiere.Cale==file_path) & (Fisiere.Criptat==criptat) & (Fisiere.Timp==timp) & (Fisiere.Hash==hash_file) & (Fisiere.UsedRAM==used_ram))
+            if framework=="OpenSSL":
+                if nume_algoritm=="AES128":
+                    openssl_command = [
+                        "openssl", "enc", "-aes128", "-pbkdf2","-d",
+                        "-in", file_path,
+                        "-out", file_path+'.temp',
+                        "-pass", "pass:"+cheie_criptare
+                    ]
+                elif nume_algoritm=="AES192":
+                    openssl_command = [
+                        "openssl", "enc", "-aes192", "-pbkdf2","-d",
+                        "-in", file_path,
+                        "-out", file_path+'.temp',
+                        "-pass", "pass:"+cheie_criptare
+                    ]
+                elif nume_algoritm=="AES256":
+                    openssl_command = [
+                        "openssl", "enc", "-aes256", "-pbkdf2","-d",
+                        "-in", file_path,
+                        "-out", file_path+'.temp',
+                        "-pass", "pass:"+cheie_criptare
+                    ]
+                completed_process = subprocess.run(openssl_command, check=True)
+                if completed_process.returncode != 0:
+                    QMessageBox.warning(self, "Avertisment", f"A apărut o eroare la decriptarea fișierului! Cod:{completed_process.returncode}", QMessageBox.Ok)
+                    return
+                copiaza_continut(file_path+'.temp',file_path)
+                fisier_e.Criptat=False
+                fisier_e.Timp=20
+                fisier_e.UsedRAM="15MB"
+                fisier_e.save()
+                self.init_list_widget_file()
+        except Fisiere.DoesNotExist:
+                QMessageBox.warning(self, "Avertisment", "Nu am putut decripta(fisier negasit)!", QMessageBox.Ok)    
     def pushButton_evaluare_performante_clicked(self):
         pass                    
 def main():
