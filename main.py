@@ -7,14 +7,14 @@ from db import *
 from main_window_ui import Ui_Dialog 
 
 OPENSSL_SYM = ["AES128", "AES192", "AES256"]
-LIBRESSL_SYM = ["AES128", "AES192", "AES256", "Camellia128", "Camellia192", "Camellia256"]
-THEMIS_SYM = ["AES128", "AES192", "AES256", "ChaCha20", "Salsa20"]
-GNUTLS_SYM = ["AES128", "AES192", "AES256", "Camellia128", "Camellia192", "Camellia256", "SEED", "3DES"]
+LIBRESSL_SYM = ["AES128", "AES256", "Camellia128"]
+THEMIS_SYM = ["AES128", "ChaCha20", "Salsa20"]
+GNUTLS_SYM = ["AES128", "Camellia128", "3DES"]
 
-OPENSSL_ASYM = ["RSA4096","DSA1024", "DSA2048", "ECDSA"]
-LIBRESSL_ASYM = ["RSA4096", "DSA1024", "DSA2048", "ECDSA)"]
+OPENSSL_ASYM = ["RSA4096","DSA1024", "ECDSA"]
+LIBRESSL_ASYM = ["RSA4096", "DSA2048", "ECDSA"]
 THEMIS_ASYM = ["RSA4096", "ECDSA", "ECDH"]
-GNUTLS_ASYM = ["RSA4096", "DSA1024", "DSA2048", "ECDSA", "ECDH"]
+GNUTLS_ASYM = ["RSA4096", "ECDSA", "ECDH"]
 
 def asimetrica(cheie):
     if " " in cheie:
@@ -27,6 +27,11 @@ def calculate_md5(file_path):
         for chunk in iter(lambda: f.read(4096), b""):
             md5_hash.update(chunk)
     return md5_hash.hexdigest()
+def algoritm_asimetric(nume):
+    if nume in OPENSSL_ASYM or nume in LIBRESSL_ASYM or nume in THEMIS_ASYM or nume in GNUTLS_ASYM:
+        return True
+    else:
+        return False 
 class MainWindow(QtWidgets.QDialog):
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -43,6 +48,9 @@ class MainWindow(QtWidgets.QDialog):
         self.ui.pushButton_stergere_algoritm.clicked.connect(self.pushButton_stergere_algoritm_clicked)
         self.ui.pushButton_modificare_algoritm.clicked.connect(self.update_algo_input_window)
         self.ui.pushButton_criptare.clicked.connect(self.encrypt_file)
+        self.ui.pushButton_decriptare.clicked.connect(self.decrypt_file)
+        self.ui.pushButton_stergere_fisier.clicked.connect(self.pushButton_stergere_fisier_clicked)
+        self.ui.pushButton_evaluare_performante.clicked.connect(self.pushButton_evaluare_performante_clicked)
     def pushButton_stergere_cheie_clicked(self):
         try:
             selected_item = self.ui.listWidget_chei.currentItem()
@@ -431,9 +439,9 @@ class MainWindow(QtWidgets.QDialog):
                     AlgoritmID = algoritm_e,
                     Cale = file_path,
                     Criptat = True,
-                    Timp = 0,
+                    Timp = 100,
                     Hash = str(file_hash),
-                    UsedRAM = "IN LUCRU"
+                    UsedRAM = "10MB"
                     )
                     self.init_list_widget_file()         
         else:
@@ -450,7 +458,40 @@ class MainWindow(QtWidgets.QDialog):
                 current_val+=fisier.AlgoritmID.CheieID.CheieCriptare+" "+fisier.AlgoritmID.CheieID.CheieDecriptare+" "
             current_val+=str(fisier.Criptat)+" "+str(fisier.Timp)+"ms MD5:"+fisier.Hash+" "+fisier.UsedRAM+" "+fisier.Cale
             values.append(current_val)
-        self.ui.listWidget_fisiere.addItems(values)                      
+        self.ui.listWidget_fisiere.addItems(values)
+    def pushButton_stergere_fisier_clicked(self):
+        selected_item = self.ui.listWidget_fisiere.currentItem()
+        if not selected_item:
+            QMessageBox.warning(self, "Avertisment", "Nu a fost selectat niciun fișier de șters!", QMessageBox.Ok)
+            return
+        componente=selected_item.text().split(" ")
+        nume_algoritm=componente[1]
+        framework=componente[2]
+        cheie_criptare=componente[3]
+        if algoritm_asimetric(nume_algoritm):
+            cheie_decriptare=componente[4]
+            criptat=bool(componente[5])
+            timp=int(componente[6][:-3])
+            hash_file=componente[7][4:]
+            used_ram=componente[8]
+            file_path=" ".join(componente[9:])
+        else:
+            cheie_decriptare=componente[3]
+            criptat=bool(componente[4])
+            timp=int(componente[5][:-2])
+            hash_file=componente[6][4:]
+            used_ram=componente[7]
+            file_path=" ".join(componente[8:])
+        framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
+        cheie_e=Chei.get((Chei.CheieCriptare == cheie_criptare)&(Chei.CheieDecriptare == cheie_decriptare))
+        algoritm_e=Algoritmi.get((Algoritmi.CheieID==cheie_e) & (Algoritmi.FrameworkID==framework_e) & (Algoritmi.Nume == nume_algoritm))
+        fisier_e=Fisiere.get((Fisiere.AlgoritmID==algoritm_e) & (Fisiere.Cale==file_path) & (Fisiere.Criptat==criptat) & (Fisiere.Timp==timp) & (Fisiere.Hash==hash_file) & (Fisiere.UsedRAM==used_ram))
+        fisier_e.delete_instance()
+        self.init_list_widget_file()
+    def decrypt_file(self):
+        pass
+    def pushButton_evaluare_performante_clicked(self):
+        pass                    
 def main():
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()

@@ -42,10 +42,10 @@
   <widget class="QListWidget" name="listWidget_framework">
    <property name="geometry">
     <rect>
-     <x>790</x>
-     <y>310</y>
+     <x>810</x>
+     <y>30</y>
      <width>181</width>
-     <height>141</height>
+     <height>91</height>
     </rect>
    </property>
    <property name="editTriggers">
@@ -148,8 +148,8 @@
   <widget class="QLabel" name="label_framework">
    <property name="geometry">
     <rect>
-     <x>790</x>
-     <y>290</y>
+     <x>810</x>
+     <y>10</y>
      <width>171</width>
      <height>20</height>
     </rect>
@@ -161,10 +161,10 @@
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>800</x>
-     <y>220</y>
-     <width>168</width>
-     <height>64</height>
+     <x>790</x>
+     <y>290</y>
+     <width>210</width>
+     <height>128</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -172,6 +172,15 @@
      <widget class="QPushButton" name="pushButton_criptare">
       <property name="text">
        <string>Criptare fișier</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton_stergere_fisier">
+      <property name="text">
+       <string>Eliminare fișier selectat din 
+baza de date(fără o nouă
+criptare/decriptare)</string>
       </property>
      </widget>
     </item>
@@ -184,11 +193,11 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>800</x>
-     <y>60</y>
+     <x>790</x>
+     <y>130</y>
      <width>250</width>
      <height>113</height>
     </rect>
@@ -222,7 +231,6 @@ framework-ul și cheia selectate</string>
  <tabstops>
   <tabstop>pushButton_add_cheie</tabstop>
   <tabstop>pushButton_stergere_cheie</tabstop>
-  <tabstop>pushButton_adaugare_algoritm</tabstop>
   <tabstop>pushButton_criptare</tabstop>
   <tabstop>listWidget_framework</tabstop>
   <tabstop>pushButton_evaluare_performante</tabstop>

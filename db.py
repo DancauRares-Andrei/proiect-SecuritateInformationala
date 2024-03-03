@@ -21,11 +21,11 @@ class Algoritmi(Model):
 class Fisiere(Model):
     FisierID = AutoField(primary_key=True)
     AlgoritmID = ForeignKeyField(Algoritmi, backref='algoritm_fisier')
-    Cale = CharField(max_length=255)
+    Cale = CharField(max_length=255,unique=True)
     Criptat = BooleanField()
     Timp = BigIntegerField()#timp stocat ca milisecunde
     Hash = CharField(max_length=65)
-    UsedRAM = CharField(max_length=20)
+    UsedRAM = CharField(max_length=20)#Stocat ca valoare numerica urmata de MB
     class Meta:
         database = db
 db.connect()
