@@ -21,7 +21,7 @@ class Algoritmi(Model):
 class Fisiere(Model):
     FisierID = AutoField(primary_key=True)
     AlgoritmID = ForeignKeyField(Algoritmi, backref='algoritm_fisier')
-    Cale = CharField(max_length=255,unique=True)
+    Cale = CharField(max_length=255)
     Criptat = BooleanField()
     Timp = BigIntegerField()#timp stocat ca milisecunde
     Hash = CharField(max_length=65)

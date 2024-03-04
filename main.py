@@ -4,7 +4,8 @@ from PyQt5.QtWidgets import QMessageBox, QInputDialog, QFileDialog
 import subprocess
 import hashlib
 import shutil
-import os
+import os, time
+import psutil
 from db import *
 from main_window_ui import Ui_Dialog 
 
@@ -436,7 +437,10 @@ class MainWindow(QtWidgets.QDialog):
                             "-out", file_path+'.temp',
                             "-pass", "pass:"+cheie_criptare
                         ]
+                    start_time = time.time()
                     completed_process = subprocess.run(openssl_command, check=True)
+                    end_time = time.time()
+                    duration_ms = (end_time - start_time) * 1000 
                     if completed_process.returncode != 0:
                         QMessageBox.warning(self, "Avertisment", f"A apărut o eroare la criptarea fișierului! Cod:{completed_process.returncode}", QMessageBox.Ok)
                         return
@@ -445,9 +449,9 @@ class MainWindow(QtWidgets.QDialog):
                     AlgoritmID = algoritm_e,
                     Cale = file_path,
                     Criptat = True,
-                    Timp = 100,
+                    Timp = duration_ms,
                     Hash = str(file_hash),
-                    UsedRAM = "10MB"
+                    UsedRAM = str(psutil.Process().memory_info().rss / (1024 * 1024))+"MB"
                     )
                     self.init_list_widget_file()         
         else:
@@ -476,14 +480,14 @@ class MainWindow(QtWidgets.QDialog):
         cheie_criptare=componente[3]
         if algoritm_asimetric(nume_algoritm):
             cheie_decriptare=componente[4]
-            criptat=bool(componente[5])
+            criptat=True if componente[5]=="True" else False
             timp=int(componente[6][:-3])
             hash_file=componente[7][4:]
             used_ram=componente[8]
             file_path=" ".join(componente[9:])
         else:
             cheie_decriptare=componente[3]
-            criptat=bool(componente[4])
+            criptat=True if componente[4]=="True" else False
             timp=int(componente[5][:-2])
             hash_file=componente[6][4:]
             used_ram=componente[7]
@@ -547,14 +551,17 @@ class MainWindow(QtWidgets.QDialog):
                         "-out", file_path+'.temp',
                         "-pass", "pass:"+cheie_criptare
                     ]
+                start_time = time.time()
                 completed_process = subprocess.run(openssl_command, check=True)
+                end_time = time.time()
+                duration_ms = (end_time - start_time) * 1000
                 if completed_process.returncode != 0:
                     QMessageBox.warning(self, "Avertisment", f"A apărut o eroare la decriptarea fișierului! Cod:{completed_process.returncode}", QMessageBox.Ok)
                     return
                 copiaza_continut(file_path+'.temp',file_path)
                 fisier_e.Criptat=False
-                fisier_e.Timp=20
-                fisier_e.UsedRAM="15MB"
+                fisier_e.Timp=duration_ms
+                fisier_e.UsedRAM=str(psutil.Process().memory_info().rss / (1024 * 1024))+"MB"
                 fisier_e.save()
                 self.init_list_widget_file()
         except Fisiere.DoesNotExist:
