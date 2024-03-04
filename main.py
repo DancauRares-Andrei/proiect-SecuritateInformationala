@@ -414,6 +414,12 @@ class MainWindow(QtWidgets.QDialog):
             file_dialog.setFileMode(QFileDialog.ExistingFile)
             if file_dialog.exec_():
                 file_path = file_dialog.selectedFiles()[0]
+                try:
+                    fisier_existent=Fisiere.get((Fisiere.Cale==file_path)&(Fisiere.Criptat==True))
+                    QMessageBox.warning(self, "Avertisment", f"Un fișier nu poate fi criptat de mai multe ori!", QMessageBox.Ok)
+                    return
+                except Fisiere.DoesNotExist:
+                    pass
                 file_hash=calculate_md5(file_path)
                 if framework=="OpenSSL":
                     if nume=="AES128":
