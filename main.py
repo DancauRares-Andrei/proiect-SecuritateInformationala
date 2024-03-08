@@ -457,8 +457,28 @@ class MainWindow(QtWidgets.QDialog):
                     UsedRAM = str(psutil.Process().memory_info().rss / (1024 * 1024))+"MB"
                     )
                     self.init_list_widget_file()
-                elif framework=="Ccrypt":
-                    pass
+                elif framework=="Ccrypt" and nume=="AES256":
+                    ccrypt_command = [
+                            "ccrypt", "-e", "-K", cheie_criptare,
+                            file_path,
+                        ]
+                    start_time = time.time()
+                    completed_process = subprocess.run(ccrypt_command, check=True)
+                    end_time = time.time()
+                    duration_ms = (end_time - start_time) * 1000 
+                    if completed_process.returncode != 0:
+                        QMessageBox.warning(self, "Avertisment", f"A apărut o eroare la criptarea fișierului! Cod:{completed_process.returncode}", QMessageBox.Ok)
+                        return
+                    copiaza_continut(file_path+'.cpt',file_path)
+                    file_e=Fisiere.create(
+                    AlgoritmID = algoritm_e,
+                    Cale = file_path,
+                    Criptat = True,
+                    Timp = duration_ms,
+                    Hash = str(file_hash),
+                    UsedRAM = str(psutil.Process().memory_info().rss / (1024 * 1024))+"MB"
+                    )
+                    self.init_list_widget_file()    
                 elif framework=="Mcrypt":
                     pass
                 elif framework=="Scrypt":
@@ -573,8 +593,23 @@ class MainWindow(QtWidgets.QDialog):
                 fisier_e.UsedRAM=str(psutil.Process().memory_info().rss / (1024 * 1024))+"MB"
                 fisier_e.save()
                 self.init_list_widget_file()
-            elif framework=="Ccrypt":
-                pass
+            elif framework=="Ccrypt" and nume_algoritm=="AES256":
+                ccrypt_command = [
+                        "ccrypt", "-d", "-K", cheie_criptare,
+                        file_path,
+                    ]
+                start_time = time.time()
+                completed_process = subprocess.run(ccrypt_command, check=True)
+                end_time = time.time()
+                duration_ms = (end_time - start_time) * 1000 
+                if completed_process.returncode != 0:
+                    QMessageBox.warning(self, "Avertisment", f"A apărut o eroare la criptarea fișierului! Cod:{completed_process.returncode}", QMessageBox.Ok)
+                    return
+                fisier_e.Criptat=False
+                fisier_e.Timp=duration_ms
+                fisier_e.UsedRAM=str(psutil.Process().memory_info().rss / (1024 * 1024))+"MB"
+                fisier_e.save()
+                self.init_list_widget_file()    
             elif framework=="Mcrypt":
                 pass
             elif framework=="Scrypt":
