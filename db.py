@@ -37,4 +37,3 @@ if not Chei.table_exists() or not Frameworkuri.table_exists() or not Algoritmi.t
         Frameworkuri.create(Nume="OpenSSL")
         Frameworkuri.create(Nume="Ccrypt")
         Frameworkuri.create(Nume="Mcrypt")
-        Frameworkuri.create(Nume="Scrypt")

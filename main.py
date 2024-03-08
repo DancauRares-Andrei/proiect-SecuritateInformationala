@@ -12,7 +12,7 @@ from main_window_ui import Ui_Dialog
 OPENSSL_SYM = ["AES128", "AES192", "AES256"]
 CCRYPT_SYM = ["AES256"]
 MCRYPT_SYM = ["AES256", "CAST128", "CAST256"]#AES256=rijdael-256
-SCRYPT_SYM = ["Scrypt"]
+
 
 OPENSSL_ASYM = ["RSA4096","DSA1024", "ECDSA"]
 
@@ -183,16 +183,6 @@ class MainWindow(QtWidgets.QDialog):
                         )
                         self.init_list_widget_algo()
                         QMessageBox.information(self, "Chei introduse", f"S-a adaugat algoritmul cu succes!", QMessageBox.Ok) 
-                    elif nume.upper() in CCRYPT_ASYM and asimetrica(cheie)==True:
-                        framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
-                        cheieCript,cheieDecript=cheie.split(" ")
-                        cheie_e=Chei.get((Chei.CheieCriptare==cheieCript) & (Chei.CheieDecriptare==cheieDecript))
-                        algo=Algoritmi.create(
-                        Nume = nume,
-                        CheieID = cheie_e,
-                        FrameworkID = framework_e
-                        )
-                        self.init_list_widget_algo()
                     else:
                          QMessageBox.warning(self, "Avertisment", "Algoritm nesuportat sau nepotrivire între algoritm și cheie!", QMessageBox.Ok)         
                 elif framework=="Mcrypt":
@@ -206,42 +196,8 @@ class MainWindow(QtWidgets.QDialog):
                         )
                         self.init_list_widget_algo()
                         QMessageBox.information(self, "Chei introduse", f"S-a adaugat algoritmul cu succes!", QMessageBox.Ok) 
-                    elif nume.upper() in MCRYPT_ASYM and asimetrica(cheie)==True:
-                        framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
-                        cheieCript,cheieDecript=cheie.split(" ")
-                        cheie_e=Chei.get((Chei.CheieCriptare==cheieCript) & (Chei.CheieDecriptare==cheieDecript))
-                        algo=Algoritmi.create(
-                        Nume = nume,
-                        CheieID = cheie_e,
-                        FrameworkID = framework_e
-                        )
-                        self.init_list_widget_algo()
                     else:
-                         QMessageBox.warning(self, "Avertisment", "Algoritm nesuportat sau nepotrivire între algoritm și cheie!", QMessageBox.Ok)         
-                elif framework=="Scrypt":
-                    if nume.upper() in SCRYPT_SYM and asimetrica(cheie)==False:
-                        framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
-                        cheie_e=Chei.get((Chei.CheieCriptare == cheie)&(Chei.CheieDecriptare == cheie))
-                        algo=Algoritmi.create(
-                        Nume = nume,
-                        CheieID = cheie_e,
-                        FrameworkID = framework_e
-                        )
-                        self.init_list_widget_algo()
-                        QMessageBox.information(self, "Chei introduse", f"S-a adaugat algoritmul cu succes!", QMessageBox.Ok) 
-                    elif nume.upper() in SCRYPT_ASYM and asimetrica(cheie)==True:
-                        framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
-                        cheieCript,cheieDecript=cheie.split(" ")
-                        cheie_e=Chei.get((Chei.CheieCriptare==cheieCript) & (Chei.CheieDecriptare==cheieDecript))
-                        algo=Algoritmi.create(
-                        Nume = nume,
-                        CheieID = cheie_e,
-                        FrameworkID = framework_e
-                        )
-                        self.init_list_widget_algo()
-                    else:
-                         QMessageBox.warning(self, "Avertisment", "Algoritm nesuportat sau nepotrivire între algoritm și cheie!", QMessageBox.Ok)         
-                         
+                         QMessageBox.warning(self, "Avertisment", "Algoritm nesuportat sau nepotrivire între algoritm și cheie!", QMessageBox.Ok)                                        
                 else:
                     QMessageBox.warning(self, "Avertisment", "Algoritm nesuportat sau nepotrivire între algoritm și cheie!", QMessageBox.Ok) 
         else:
@@ -331,15 +287,6 @@ class MainWindow(QtWidgets.QDialog):
                             algoritm_vechi.save()
                             self.init_list_widget_algo()
                             QMessageBox.information(self, "Chei introduse", f"S-a adaugat algoritmul cu succes!", QMessageBox.Ok) 
-                        elif nume.upper() in CCRYPT_ASYM and asimetrica(cheie)==True:
-                            framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
-                            cheieCript,cheieDecript=cheie.split(" ")
-                            cheie_e=Chei.get((Chei.CheieCriptare==cheieCript) & (Chei.CheieDecriptare==cheieDecript))
-                            algoritm_vechi.FrameworkID=framework_e
-                            algoritm_vechi.CheieID=cheie_e
-                            algoritm_vechi.Nume=nume
-                            algoritm_vechi.save()
-                            self.init_list_widget_algo()
                         else:
                              QMessageBox.warning(self, "Avertisment", "Algoritm nesuportat sau nepotrivire între algoritm și cheie!", QMessageBox.Ok)         
                     elif framework=="Mcrypt":
@@ -352,39 +299,8 @@ class MainWindow(QtWidgets.QDialog):
                             algoritm_vechi.save()
                             self.init_list_widget_algo()
                             QMessageBox.information(self, "Chei introduse", f"S-a adaugat algoritmul cu succes!", QMessageBox.Ok) 
-                        elif nume.upper() in MCRYPT_ASYM and asimetrica(cheie)==True:
-                            framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
-                            cheieCript,cheieDecript=cheie.split(" ")
-                            cheie_e=Chei.get((Chei.CheieCriptare==cheieCript) & (Chei.CheieDecriptare==cheieDecript))
-                            algoritm_vechi.FrameworkID=framework_e
-                            algoritm_vechi.CheieID=cheie_e
-                            algoritm_vechi.Nume=nume
-                            algoritm_vechi.save()
-                            self.init_list_widget_algo()
                         else:
-                             QMessageBox.warning(self, "Avertisment", "Algoritm nesuportat sau nepotrivire între algoritm și cheie!", QMessageBox.Ok)         
-                    elif framework=="Scrypt":
-                        if nume.upper() in SCRYPT_SYM and asimetrica(cheie)==False:
-                            framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
-                            cheie_e=Chei.get((Chei.CheieCriptare == cheie)&(Chei.CheieDecriptare == cheie))
-                            algoritm_vechi.FrameworkID=framework_e
-                            algoritm_vechi.CheieID=cheie_e
-                            algoritm_vechi.Nume=nume
-                            algoritm_vechi.save()
-                            self.init_list_widget_algo()
-                            QMessageBox.information(self, "Chei introduse", f"S-a adaugat algoritmul cu succes!", QMessageBox.Ok) 
-                        elif nume.upper() in SCRYPT_ASYM and asimetrica(cheie)==True:
-                            framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
-                            cheieCript,cheieDecript=cheie.split(" ")
-                            cheie_e=Chei.get((Chei.CheieCriptare==cheieCript) & (Chei.CheieDecriptare==cheieDecript))
-                            algoritm_vechi.FrameworkID=framework_e
-                            algoritm_vechi.CheieID=cheie_e
-                            algoritm_vechi.Nume=nume
-                            algoritm_vechi.save()
-                            self.init_list_widget_algo()
-                        else:
-                             QMessageBox.warning(self, "Avertisment", "Algoritm nesuportat sau nepotrivire între algoritm și cheie!", QMessageBox.Ok)         
-                             
+                             QMessageBox.warning(self, "Avertisment", "Algoritm nesuportat sau nepotrivire între algoritm și cheie!", QMessageBox.Ok)                                          
                     else:
                         QMessageBox.warning(self, "Avertisment", "Algoritm nesuportat sau nepotrivire între algoritm și cheie!", QMessageBox.Ok) 
             else:
@@ -480,9 +396,7 @@ class MainWindow(QtWidgets.QDialog):
                     )
                     self.init_list_widget_file()    
                 elif framework=="Mcrypt":
-                    pass
-                elif framework=="Scrypt":
-                    pass             
+                    pass          
         else:
              QMessageBox.warning(self, "Avertisment", "Nu a fost selectat niciun algoritm de criptare!", QMessageBox.Ok)
     def init_list_widget_file(self):
@@ -611,9 +525,7 @@ class MainWindow(QtWidgets.QDialog):
                 fisier_e.save()
                 self.init_list_widget_file()    
             elif framework=="Mcrypt":
-                pass
-            elif framework=="Scrypt":
-                pass       
+                pass     
         except Fisiere.DoesNotExist:
                 QMessageBox.warning(self, "Avertisment", "Nu am putut decripta(fisier negasit)!", QMessageBox.Ok)    
     def pushButton_evaluare_performante_clicked(self):
