@@ -35,6 +35,6 @@ if not Chei.table_exists() or not Frameworkuri.table_exists() or not Algoritmi.t
         framework=Frameworkuri.get(Frameworkuri.Nume == "OpenSSL")
     except Frameworkuri.DoesNotExist:
         Frameworkuri.create(Nume="OpenSSL")
-        Frameworkuri.create(Nume="LibreSSL")
-        Frameworkuri.create(Nume="Themis")
-        Frameworkuri.create(Nume="GnuTLS")
+        Frameworkuri.create(Nume="Ccrypt")
+        Frameworkuri.create(Nume="Mcrypt")
+        Frameworkuri.create(Nume="Scrypt")
