@@ -396,7 +396,32 @@ class MainWindow(QtWidgets.QDialog):
                     )
                     self.init_list_widget_file()    
                 elif framework=="Mcrypt":
-                    pass          
+                    if nume == "AES256":
+                        mcrypt_command = [
+                            "mcrypt", "-m", "cbc","-k" , cheie_criptare, "-a","rijndael-256" ,file_path,"--flush","-q"
+                        ]
+                    elif nume == "CAST128":
+                        mcrypt_command = [
+                            "mcrypt", "-m", "cbc","-k" , cheie_criptare, "-a","cast-128" ,file_path,"--flush","-q"
+                        ]
+                    elif nume == "CAST256":
+                        mcrypt_command = [
+                            "mcrypt", "-m", "cbc","-k" , cheie_criptare, "-a","cast-256" ,file_path,"--flush","-q"
+                        ]
+                    start_time = time.time()
+                    completed_process = subprocess.run(mcrypt_command, check=True)
+                    end_time = time.time()
+                    duration_ms = (end_time - start_time) * 1000    
+                    copiaza_continut(file_path+'.nc',file_path)
+                    file_e=Fisiere.create(
+                    AlgoritmID = algoritm_e,
+                    Cale = file_path,
+                    Criptat = True,
+                    Timp = duration_ms,
+                    Hash = str(file_hash),
+                    UsedRAM = str(psutil.Process().memory_info().rss / (1024 * 1024))+"MB"
+                    )
+                    self.init_list_widget_file()         
         else:
              QMessageBox.warning(self, "Avertisment", "Nu a fost selectat niciun algoritm de criptare!", QMessageBox.Ok)
     def init_list_widget_file(self):
@@ -525,7 +550,28 @@ class MainWindow(QtWidgets.QDialog):
                 fisier_e.save()
                 self.init_list_widget_file()    
             elif framework=="Mcrypt":
-                pass     
+                if nume_algoritm=="AES256":
+                    mcrypt_command = [
+                            "mcrypt", "-d", "-m", "cbc","-k" , cheie_criptare, "-a","rijndael-256" ,file_path,"--flush","-q"
+                        ]
+                elif nume_algoritm == "CAST128":
+                    mcrypt_command = [
+                            "mcrypt", "-d", "-m", "cbc","-k" , cheie_criptare, "-a","cast-128" ,file_path,"--flush","-q"
+                        ]
+                elif nume_algoritm == "CAST256":
+                    mcrypt_command = [
+                            "mcrypt", "-d", "-m", "cbc","-k" , cheie_criptare, "-a","cast-256" ,file_path,"--flush","-q"
+                        ] 
+                start_time = time.time()
+                completed_process = subprocess.run(mcrypt_command, check=True)
+                end_time = time.time()
+                duration_ms = (end_time - start_time) * 1000
+                copiaza_continut(file_path+'.dc',file_path)
+                fisier_e.Criptat=False
+                fisier_e.Timp=duration_ms
+                fisier_e.UsedRAM=str(psutil.Process().memory_info().rss / (1024 * 1024))+"MB"
+                fisier_e.save()
+                self.init_list_widget_file()           
         except Fisiere.DoesNotExist:
                 QMessageBox.warning(self, "Avertisment", "Nu am putut decripta(fisier negasit)!", QMessageBox.Ok)    
     def pushButton_evaluare_performante_clicked(self):
