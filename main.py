@@ -50,8 +50,8 @@ class MainWindow(QtWidgets.QDialog):
         self.ui.pushButton_adaugare_algoritm.clicked.connect(self.add_algo_input_window)
         self.ui.pushButton_stergere_algoritm.clicked.connect(self.pushButton_stergere_algoritm_clicked)
         self.ui.pushButton_modificare_algoritm.clicked.connect(self.update_algo_input_window)
-        self.ui.pushButton_criptare.clicked.connect(self.encrypt_file)
-        self.ui.pushButton_decriptare.clicked.connect(self.decrypt_file)
+        self.ui.pushButton_criptare.clicked.connect(self.pushButton_criptare_clicked)
+        self.ui.pushButton_decriptare.clicked.connect(self.pushButton_decriptare_clicked)
         self.ui.pushButton_stergere_fisier.clicked.connect(self.pushButton_stergere_fisier_clicked)
         self.ui.pushButton_evaluare_performante.clicked.connect(self.pushButton_evaluare_performante_clicked)
     def pushButton_stergere_cheie_clicked(self):
@@ -307,7 +307,7 @@ class MainWindow(QtWidgets.QDialog):
                 QMessageBox.warning(self, "Avertisment", "Trebuie selectat un framework și o cheie!", QMessageBox.Ok)  
         else:
              QMessageBox.warning(self, "Avertisment", "Nu a fost selectat niciun algoritm de modificat!", QMessageBox.Ok)  
-    def encrypt_file(self):
+    def pushButton_criptare_clicked(self):
         selected_item = self.ui.listWidget_algoritmi.currentItem()
         if selected_item:
             componente=selected_item.text().split(" ")
@@ -466,7 +466,7 @@ class MainWindow(QtWidgets.QDialog):
         fisier_e=Fisiere.get((Fisiere.AlgoritmID==algoritm_e) & (Fisiere.Cale==file_path) & (Fisiere.Criptat==criptat) & (Fisiere.Timp==timp) & (Fisiere.Hash==hash_file) & (Fisiere.UsedRAM==used_ram))
         fisier_e.delete_instance()
         self.init_list_widget_file()
-    def decrypt_file(self):
+    def pushButton_decriptare_clicked(self):
         try:
             selected_item = self.ui.listWidget_fisiere.currentItem()
             if not selected_item:
@@ -575,7 +575,15 @@ class MainWindow(QtWidgets.QDialog):
         except Fisiere.DoesNotExist:
                 QMessageBox.warning(self, "Avertisment", "Nu am putut decripta(fisier negasit)!", QMessageBox.Ok)    
     def pushButton_evaluare_performante_clicked(self):
-        pass                    
+        print(Fisiere.select().where(Fisiere.AlgoritmID.Nume=="AES256"))
+        open_ssl_criptate_aes256=Fisiere.select().where(Fisiere.AlgoritmID.FrameworkID.Nume=="OpenSSL" and Fisiere.Criptat==True and Fisiere.AlgoritmID.Nume=="AES256")#
+        #open_ssl_decriptate_aes256=list(Fisiere.select().where(Fisiere.AlgoritmID.FrameworkID.Nume=="OpenSSL" and Fisiere.Criptat==False and Fisiere.AlgoritmID.Nume=="AES256"))
+        #ccrypt_criptate_aes256=list(Fisiere.select().where(Fisiere.AlgoritmID.FrameworkID.Nume=="Ccrypt" and Fisiere.Criptat==True and Fisiere.AlgoritmID.Nume=="AES256"))
+        #ccrypt_decriptate_aes256=list(Fisiere.select().where(Fisiere.AlgoritmID.FrameworkID.Nume=="Ccrypt" and Fisiere.Criptat==False and Fisiere.AlgoritmID.Nume=="AES256"))
+        #mcrypt_criptate_aes256=list(Fisiere.select().where(Fisiere.AlgoritmID.FrameworkID.Nume=="Mcrypt" and Fisiere.Criptat==True and Fisiere.AlgoritmID.Nume=="AES256"))
+        #mcrypt_decriptate_aes256=list(Fisiere.select().where(Fisiere.AlgoritmID.FrameworkID.Nume=="Mcrypt" and Fisiere.Criptat==False and Fisiere.AlgoritmID.Nume=="AES256"))  
+        #for file in open_ssl_criptate_aes256:
+        #    print(file.AlgoritmID.Nume)          
 def main():
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
