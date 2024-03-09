@@ -19,7 +19,7 @@ class Ui_Dialog(object):
         self.label_cheie.setGeometry(QtCore.QRect(30, 10, 161, 20))
         self.label_cheie.setObjectName("label_cheie")
         self.pushButton_evaluare_performante = QtWidgets.QPushButton(Dialog)
-        self.pushButton_evaluare_performante.setGeometry(QtCore.QRect(790, 460, 251, 28))
+        self.pushButton_evaluare_performante.setGeometry(QtCore.QRect(720, 480, 341, 28))
         self.pushButton_evaluare_performante.setObjectName("pushButton_evaluare_performante")
         self.listWidget_framework = QtWidgets.QListWidget(Dialog)
         self.listWidget_framework.setGeometry(QtCore.QRect(810, 30, 181, 91))
@@ -101,7 +101,7 @@ class Ui_Dialog(object):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "ProiectSI"))
         self.label_cheie.setText(_translate("Dialog", "Chei/Perechi disponibile:"))
-        self.pushButton_evaluare_performante.setText(_translate("Dialog", "Comparare performanță framework-uri"))
+        self.pushButton_evaluare_performante.setText(_translate("Dialog", "Comparare performanță framework-uri pentru AES256"))
         self.labelAlgo.setText(_translate("Dialog", "Algoritmi disponibili:"))
         self.label_fisier.setText(_translate("Dialog", "Fișiere gestionate:"))
         self.pushButton_add_cheie.setText(_translate("Dialog", "Adăugare cheie/pereche"))

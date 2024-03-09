@@ -575,15 +575,80 @@ class MainWindow(QtWidgets.QDialog):
         except Fisiere.DoesNotExist:
                 QMessageBox.warning(self, "Avertisment", "Nu am putut decripta(fisier negasit)!", QMessageBox.Ok)    
     def pushButton_evaluare_performante_clicked(self):
-        print(Fisiere.select().where(Fisiere.AlgoritmID.Nume=="AES256"))
-        open_ssl_criptate_aes256=Fisiere.select().where(Fisiere.AlgoritmID.FrameworkID.Nume=="OpenSSL" and Fisiere.Criptat==True and Fisiere.AlgoritmID.Nume=="AES256")#
-        #open_ssl_decriptate_aes256=list(Fisiere.select().where(Fisiere.AlgoritmID.FrameworkID.Nume=="OpenSSL" and Fisiere.Criptat==False and Fisiere.AlgoritmID.Nume=="AES256"))
-        #ccrypt_criptate_aes256=list(Fisiere.select().where(Fisiere.AlgoritmID.FrameworkID.Nume=="Ccrypt" and Fisiere.Criptat==True and Fisiere.AlgoritmID.Nume=="AES256"))
-        #ccrypt_decriptate_aes256=list(Fisiere.select().where(Fisiere.AlgoritmID.FrameworkID.Nume=="Ccrypt" and Fisiere.Criptat==False and Fisiere.AlgoritmID.Nume=="AES256"))
-        #mcrypt_criptate_aes256=list(Fisiere.select().where(Fisiere.AlgoritmID.FrameworkID.Nume=="Mcrypt" and Fisiere.Criptat==True and Fisiere.AlgoritmID.Nume=="AES256"))
-        #mcrypt_decriptate_aes256=list(Fisiere.select().where(Fisiere.AlgoritmID.FrameworkID.Nume=="Mcrypt" and Fisiere.Criptat==False and Fisiere.AlgoritmID.Nume=="AES256"))  
-        #for file in open_ssl_criptate_aes256:
-        #    print(file.AlgoritmID.Nume)          
+        open_ssl_criptate_aes256=list(Fisiere.select().join(Algoritmi).join(Frameworkuri).where((Frameworkuri.Nume=="OpenSSL") & (Fisiere.Criptat==True) & (Algoritmi.Nume=="AES256")))
+        if len(open_ssl_criptate_aes256)==0:
+            QMessageBox.warning(self, "Avertisment", "Pentru a compara framework-urile, trebuie să existe un fișier criptat cu AES256 și OpenSSL", QMessageBox.Ok)
+            return
+        open_ssl_decriptate_aes256=list(Fisiere.select().join(Algoritmi).join(Frameworkuri).where((Frameworkuri.Nume=="OpenSSL") & (Fisiere.Criptat==False) & (Algoritmi.Nume=="AES256")))
+        if len(open_ssl_decriptate_aes256)==0:
+            QMessageBox.warning(self, "Avertisment", "Pentru a compara framework-urile, trebuie să existe un fișier decriptat cu AES256 și OpenSSL", QMessageBox.Ok)
+            return
+        ccrypt_criptate_aes256=list(Fisiere.select().join(Algoritmi).join(Frameworkuri).where((Frameworkuri.Nume=="Ccrypt") & (Fisiere.Criptat==True) & (Algoritmi.Nume=="AES256")))
+        if len(ccrypt_criptate_aes256)==0:
+            QMessageBox.warning(self, "Avertisment", "Pentru a compara framework-urile, trebuie să existe un fișier criptat cu AES256 și Ccrypt", QMessageBox.Ok)
+            return
+        ccrypt_decriptate_aes256=list(Fisiere.select().join(Algoritmi).join(Frameworkuri).where((Frameworkuri.Nume=="Ccrypt") & (Fisiere.Criptat==False) & (Algoritmi.Nume=="AES256")))
+        if len(ccrypt_decriptate_aes256)==0:
+            QMessageBox.warning(self, "Avertisment", "Pentru a compara framework-urile, trebuie să existe un fișier decriptat cu AES256 și Ccrypt", QMessageBox.Ok)
+            return
+        mcrypt_criptate_aes256=list(Fisiere.select().join(Algoritmi).join(Frameworkuri).where((Frameworkuri.Nume=="Mcrypt") & (Fisiere.Criptat==True) & (Algoritmi.Nume=="AES256")))
+        if len(mcrypt_criptate_aes256)==0:
+            QMessageBox.warning(self, "Avertisment", "Pentru a compara framework-urile, trebuie să existe un fișier criptat cu AES256 și Mcrypt", QMessageBox.Ok)
+            return
+        mcrypt_decriptate_aes256=list(Fisiere.select().join(Algoritmi).join(Frameworkuri).where((Frameworkuri.Nume=="Mcrypt") & (Fisiere.Criptat==False) & (Algoritmi.Nume=="AES256")))
+        if len(mcrypt_decriptate_aes256)==0:
+            QMessageBox.warning(self, "Avertisment", "Pentru a compara framework-urile, trebuie să existe un fișier decriptat cu AES256 și Mcrypt", QMessageBox.Ok)
+            return
+        timp_criptare_open_ssl=0
+        ram_consumat_criptare_open_ssl=0
+        for fisier in open_ssl_criptate_aes256:
+            timp_criptare_open_ssl+=float(fisier.Timp)
+            ram_consumat_criptare_open_ssl+=float(fisier.UsedRAM[:-2])
+        timp_criptare_open_ssl/=len(open_ssl_criptate_aes256)
+        ram_consumat_criptare_open_ssl/=len(open_ssl_criptate_aes256)
+        timp_decriptare_open_ssl=0
+        ram_consumat_decriptare_open_ssl=0
+        for fisier in open_ssl_decriptate_aes256:
+            timp_decriptare_open_ssl+=float(fisier.Timp)
+            ram_consumat_decriptare_open_ssl+=float(fisier.UsedRAM[:-2])
+        timp_decriptare_open_ssl/=len(open_ssl_decriptate_aes256)
+        ram_consumat_decriptare_open_ssl/=len(open_ssl_decriptate_aes256)
+        timp_criptare_ccrypt=0
+        ram_consumat_criptare_ccrypt=0
+        for fisier in ccrypt_criptate_aes256:
+            timp_criptare_ccrypt+=float(fisier.Timp)
+            ram_consumat_criptare_ccrypt+=float(fisier.UsedRAM[:-2])
+        timp_criptare_ccrypt/=len(ccrypt_criptate_aes256)
+        ram_consumat_criptare_ccrypt/=len(ccrypt_criptate_aes256)
+        timp_decriptare_ccrypt=0
+        ram_consumat_decriptare_ccrypt=0
+        for fisier in ccrypt_decriptate_aes256:
+            timp_decriptare_ccrypt+=float(fisier.Timp)
+            ram_consumat_decriptare_ccrypt+=float(fisier.UsedRAM[:-2])
+        timp_decriptare_ccrypt/=len(ccrypt_decriptate_aes256)
+        ram_consumat_decriptare_ccrypt/=len(ccrypt_decriptate_aes256)
+        timp_criptare_mcrypt=0
+        ram_consumat_criptare_mcrypt=0
+        for fisier in mcrypt_criptate_aes256:
+            timp_criptare_mcrypt+=float(fisier.Timp)
+            ram_consumat_criptare_mcrypt+=float(fisier.UsedRAM[:-2])
+        timp_criptare_mcrypt/=len(mcrypt_criptate_aes256)
+        ram_consumat_criptare_mcrypt/=len(mcrypt_criptate_aes256)
+        timp_decriptare_mcrypt=0
+        ram_consumat_decriptare_mcrypt=0
+        for fisier in mcrypt_decriptate_aes256:
+            timp_decriptare_mcrypt+=float(fisier.Timp)
+            ram_consumat_decriptare_mcrypt+=float(fisier.UsedRAM[:-2])
+        timp_decriptare_mcrypt/=len(mcrypt_decriptate_aes256)
+        ram_consumat_decriptare_mcrypt/=len(mcrypt_decriptate_aes256)
+        QMessageBox.information(None, "Parametri medii", f"""
+OpenSSL criptare: {timp_criptare_open_ssl} ms/fișier {ram_consumat_criptare_open_ssl} MB/fișier \n 
+OpenSSL decriptare: {timp_decriptare_open_ssl} ms/fișier {ram_consumat_decriptare_open_ssl} MB/fișier \n
+Ccrypt criptare: {timp_criptare_ccrypt} ms/fișier {ram_consumat_criptare_ccrypt} MB/fișier \n 
+Ccrypt decriptare: {timp_decriptare_ccrypt} ms/fișier {ram_consumat_decriptare_ccrypt} MB/fișier \n
+Mcrypt criptare: {timp_criptare_mcrypt} ms/fișier {ram_consumat_criptare_mcrypt} MB/fișier \n 
+Mcrypt decriptare: {timp_decriptare_mcrypt} ms/fișier {ram_consumat_decriptare_mcrypt} MB/fișier \n
+        """)
 def main():
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()

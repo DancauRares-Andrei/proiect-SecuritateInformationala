@@ -29,14 +29,14 @@
   <widget class="QPushButton" name="pushButton_evaluare_performante">
    <property name="geometry">
     <rect>
-     <x>790</x>
-     <y>460</y>
-     <width>251</width>
+     <x>720</x>
+     <y>480</y>
+     <width>341</width>
      <height>28</height>
     </rect>
    </property>
    <property name="text">
-    <string>Comparare performanță framework-uri</string>
+    <string>Comparare performanță framework-uri pentru AES256</string>
    </property>
   </widget>
   <widget class="QListWidget" name="listWidget_framework">
