@@ -14,7 +14,7 @@ CCRYPT_SYM = ["AES256"]
 MCRYPT_SYM = ["AES256", "CAST128", "CAST256"]#AES256=rijdael-256
 
 
-OPENSSL_ASYM = ["RSA4096","DSA1024", "ECDSA"]
+#OPENSSL_ASYM = ["RSA512"]
 
 def asimetrica(cheie):
     if " " in cheie:
@@ -27,11 +27,7 @@ def calculate_md5(file_path):
         for chunk in iter(lambda: f.read(4096), b""):
             md5_hash.update(chunk)
     return md5_hash.hexdigest()
-def algoritm_asimetric(nume):
-    if nume in OPENSSL_ASYM:
-        return True
-    else:
-        return False 
+
 def copiaza_continut(fisier_sursa, fisier_destinatie):
     shutil.copy(fisier_sursa, fisier_destinatie)
     os.remove(fisier_sursa)
@@ -160,7 +156,7 @@ class MainWindow(QtWidgets.QDialog):
                         )
                         self.init_list_widget_algo()
                         QMessageBox.information(self, "Chei introduse", f"S-a adaugat algoritmul cu succes!", QMessageBox.Ok) 
-                    elif nume.upper() in OPENSSL_ASYM and asimetrica(cheie)==True:
+                    elif nume.upper()=="RSA512" and asimetrica(cheie)==True:
                         framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
                         cheieCript,cheieDecript=cheie.split(" ")
                         cheie_e=Chei.get((Chei.CheieCriptare==cheieCript) & (Chei.CheieDecriptare==cheieDecript))
@@ -266,7 +262,7 @@ class MainWindow(QtWidgets.QDialog):
                             algoritm_vechi.save()
                             self.init_list_widget_algo()
                             QMessageBox.information(self, "Chei introduse", f"S-a adaugat algoritmul cu succes!", QMessageBox.Ok) 
-                        elif nume.upper() in OPENSSL_ASYM and asimetrica(cheie)==True:
+                        elif nume.upper()=="RSA512" and asimetrica(cheie)==True:
                             framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
                             cheieCript,cheieDecript=cheie.split(" ")
                             cheie_e=Chei.get((Chei.CheieCriptare==cheieCript) & (Chei.CheieDecriptare==cheieDecript))
@@ -356,6 +352,18 @@ class MainWindow(QtWidgets.QDialog):
                             "-out", file_path+'.temp',
                             "-pass", "pass:"+cheie_criptare
                         ]
+                    elif nume=="RSA512":
+                    #openssl pkeyutl -encrypt -inkey cheieRSApub.txt -pubin -in text_de_criptatRSA512.txt -out criptat.rsa512
+                         with open(file_path+".cheie_pub", "w") as file_pubkey:
+                            file_pubkey.write("-----BEGIN PUBLIC KEY-----\n")
+                            file_pubkey.write(cheie_criptare+"\n")
+                            file_pubkey.write("-----END PUBLIC KEY-----\n")
+                         openssl_command = [
+                            "openssl", "pkeyutl", "-encrypt", "-inkey",
+                            file_path+".cheie_pub","-pubin",
+                            "-in",file_path,
+                            "-out", file_path+'.temp',
+                        ]
                     start_time = time.time()
                     completed_process = subprocess.run(openssl_command, check=True)
                     end_time = time.time()
@@ -372,6 +380,8 @@ class MainWindow(QtWidgets.QDialog):
                     Hash = str(file_hash),
                     UsedRAM = str(psutil.Process().memory_info().rss / (1024 * 1024))+"MB"
                     )
+                    if nume=="RSA512":
+                        os.remove(file_path+".cheie_pub")
                     self.init_list_widget_file()
                 elif framework=="Ccrypt" and nume=="AES256":
                     ccrypt_command = [
@@ -446,7 +456,7 @@ class MainWindow(QtWidgets.QDialog):
         nume_algoritm=componente[1]
         framework=componente[2]
         cheie_criptare=componente[3]
-        if algoritm_asimetric(nume_algoritm):
+        if nume_algoritm=="RSA512":
             cheie_decriptare=componente[4]
             criptat=True if componente[5]=="True" else False
             timp=int(componente[6][:-3])
@@ -476,10 +486,11 @@ class MainWindow(QtWidgets.QDialog):
             nume_algoritm=componente[1]
             framework=componente[2]
             cheie_criptare=componente[3]
-            if algoritm_asimetric(nume_algoritm):
+            if nume_algoritm=="RSA512":
                 cheie_decriptare=componente[4]
                 criptat=True if componente[5]=="True" else False
-                timp=int(componente[6][:-3])
+                print(componente[6])
+                timp=int(componente[6][:-2])
                 hash_file=componente[7][4:]
                 used_ram=componente[8]
                 file_path=" ".join(componente[9:])
@@ -519,6 +530,18 @@ class MainWindow(QtWidgets.QDialog):
                         "-out", file_path+'.temp',
                         "-pass", "pass:"+cheie_criptare
                     ]
+                elif nume_algoritm=="RSA512":
+                    #openssl pkeyutl -decrypt -inkey cheieRSA.txt -in criptat.rsa512 -out decriptat.txt
+                    with open(file_path+".cheie_priv", "w") as file_pubkey:
+                            file_pubkey.write("-----BEGIN PRIVATE KEY-----\n")
+                            file_pubkey.write(cheie_decriptare+"\n")
+                            file_pubkey.write("-----END PRIVATE KEY-----\n")
+                    openssl_command = [
+                        "openssl", "pkeyutl", "-decrypt", "-inkey",
+                        file_path+".cheie_priv",
+                        "-in",file_path,
+                        "-out", file_path+'.temp',
+                    ]  
                 start_time = time.time()
                 completed_process = subprocess.run(openssl_command, check=True)
                 end_time = time.time()
@@ -531,6 +554,8 @@ class MainWindow(QtWidgets.QDialog):
                 fisier_e.Timp=duration_ms
                 fisier_e.UsedRAM=str(psutil.Process().memory_info().rss / (1024 * 1024))+"MB"
                 fisier_e.save()
+                if nume_algoritm=="RSA512":
+                        os.remove(file_path+".cheie_priv")
                 self.init_list_widget_file()
             elif framework=="Ccrypt" and nume_algoritm=="AES256":
                 ccrypt_command = [

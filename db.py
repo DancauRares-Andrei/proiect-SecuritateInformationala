@@ -2,8 +2,8 @@ from peewee import *
 db=MySQLDatabase(database='si_proiect',user='rares',password='rares',host='localhost',port=3306)
 class Chei(Model):
     CheieID = AutoField(primary_key=True)
-    CheieCriptare = CharField(max_length=128)
-    CheieDecriptare = CharField(max_length=128)    
+    CheieCriptare = CharField(max_length=1000)
+    CheieDecriptare = CharField(max_length=1000)    
     class Meta:
         database = db
 class Frameworkuri(Model):
