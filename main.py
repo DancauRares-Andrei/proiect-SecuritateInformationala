@@ -13,9 +13,6 @@ OPENSSL_SYM = ["AES128", "AES192", "AES256"]
 CCRYPT_SYM = ["AES256"]
 MCRYPT_SYM = ["AES256", "CAST128", "CAST256"]#AES256=rijdael-256
 
-
-#OPENSSL_ASYM = ["RSA512"]
-
 def asimetrica(cheie):
     if " " in cheie:
         return True
@@ -353,7 +350,6 @@ class MainWindow(QtWidgets.QDialog):
                             "-pass", "pass:"+cheie_criptare
                         ]
                     elif nume=="RSA512":
-                    #openssl pkeyutl -encrypt -inkey cheieRSApub.txt -pubin -in text_de_criptatRSA512.txt -out criptat.rsa512
                          with open(file_path+".cheie_pub", "w") as file_pubkey:
                             file_pubkey.write("-----BEGIN PUBLIC KEY-----\n")
                             file_pubkey.write(cheie_criptare+"\n")
@@ -459,7 +455,7 @@ class MainWindow(QtWidgets.QDialog):
         if nume_algoritm=="RSA512":
             cheie_decriptare=componente[4]
             criptat=True if componente[5]=="True" else False
-            timp=int(componente[6][:-3])
+            timp=int(componente[6][:-2])
             hash_file=componente[7][4:]
             used_ram=componente[8]
             file_path=" ".join(componente[9:])
@@ -489,7 +485,6 @@ class MainWindow(QtWidgets.QDialog):
             if nume_algoritm=="RSA512":
                 cheie_decriptare=componente[4]
                 criptat=True if componente[5]=="True" else False
-                print(componente[6])
                 timp=int(componente[6][:-2])
                 hash_file=componente[7][4:]
                 used_ram=componente[8]
@@ -531,7 +526,6 @@ class MainWindow(QtWidgets.QDialog):
                         "-pass", "pass:"+cheie_criptare
                     ]
                 elif nume_algoritm=="RSA512":
-                    #openssl pkeyutl -decrypt -inkey cheieRSA.txt -in criptat.rsa512 -out decriptat.txt
                     with open(file_path+".cheie_priv", "w") as file_pubkey:
                             file_pubkey.write("-----BEGIN PRIVATE KEY-----\n")
                             file_pubkey.write(cheie_decriptare+"\n")
