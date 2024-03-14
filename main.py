@@ -1,11 +1,13 @@
 import sys
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QMessageBox, QInputDialog, QFileDialog
+from PyQt5.QtWidgets import QMessageBox, QInputDialog, QFileDialog, QDialog, QVBoxLayout
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import subprocess
 import hashlib
 import shutil
 import os, time
 import psutil
+import matplotlib.pyplot as plt
 from db import *
 from main_window_ui import Ui_Dialog 
 
@@ -39,6 +41,19 @@ def evaluare_performanta(fisiere):
     timp/=dim_fisiere#timp in ms normalizat la dimensiunea fisierelor
     ram_consumat/=dim_fisiere#MB RAM consumati normalizat la dimensiunea fisierelor
     return round(timp,4),round(ram_consumat,4)
+class GraphWindow(QDialog):
+    def __init__(self,fig,parent=None):
+        super().__init__(parent)
+        self.setWindowTitle('Grafice Performanță')
+        layout = QVBoxLayout()
+        
+        # Adăugare grafic timp
+        fig.tight_layout()
+        canvas1 = FigureCanvas(fig)
+        layout.addWidget(canvas1)
+
+        self.setLayout(layout)
+        self.resize(1280, 1000)
 class MainWindow(QtWidgets.QDialog):
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -96,7 +111,7 @@ class MainWindow(QtWidgets.QDialog):
             key1, ok1 = QInputDialog.getText(self, 'Introducere noua cheie de criptare', 'Introduceți noua cheie de criptare:')
             key2, ok2 = QInputDialog.getText(self, 'Introducere cheie decriptare', 'Introduceți cheia de decriptare(identică cu precedenta dacă se dorește cheie simetrică):')
             
-            if ok1 and ok2:
+            if ok1 and ok2 and key1!="" and key2!="":
                 if not " " in key1 and " " not in key2:#Verificarea existentei spatiilor in chei
                     if asimetrica(cheie_veche)==False and key1!=key2:
                         QMessageBox.warning(self, "Avertisment", "Nu pot înlocui o cheie simetrică cu o pereche de chei asimetrice!", QMessageBox.Ok)
@@ -127,7 +142,7 @@ class MainWindow(QtWidgets.QDialog):
         key1, ok1 = QInputDialog.getText(self, 'Introducere cheie criptare', 'Introduceți cheia de criptare:')
         key2, ok2 = QInputDialog.getText(self, 'Introducere cheie decriptare', 'Introduceți cheia de decriptare(identică cu precedenta dacă se dorește cheie simetrică):')
         
-        if ok1 and ok2:
+        if ok1 and ok2 and key1!="" and key2!="":
             if not " " in key1 and " " not in key2:#Verificarea existentei spatiilor in chei
                 cheie=Chei.create(
                 CheieCriptare=key1,
@@ -598,15 +613,31 @@ class MainWindow(QtWidgets.QDialog):
         timp_criptare_ccrypt_normalizat, ram_consumat_criptare_ccrypt_normalizat = evaluare_performanta(ccrypt_criptate_aes256)
         timp_decriptare_ccrypt_normalizat, ram_consumat_decriptare_ccrypt_normalizat = evaluare_performanta(ccrypt_decriptate_aes256)
         timp_criptare_mcrypt_normalizat, ram_consumat_criptare_mcrypt_normalizat = evaluare_performanta(mcrypt_criptate_aes256)
-        timp_decriptare_ccrypt_normalizat, ram_consumat_decriptare_ccrypt_normalizat= evaluare_performanta(mcrypt_decriptate_aes256)
-        QMessageBox.information(None, "Parametri medii", f"""
-OpenSSL criptare: {timp_criptare_open_ssl_normalizat} ms/kB procesati {ram_consumat_criptare_open_ssl_normalizat} MB RAM/kB procesați \n 
-OpenSSL decriptare: {timp_decriptare_open_ssl_normalizat} ms/kB procesati {ram_consumat_decriptare_open_ssl_normalizat} MB RAM/kB procesați \n
-Ccrypt criptare: {timp_criptare_ccrypt_normalizat} ms/kB procesati {ram_consumat_criptare_ccrypt_normalizat} MB RAM/kB procesați \n 
-Ccrypt decriptare: {timp_decriptare_ccrypt_normalizat} ms/kB procesati {ram_consumat_decriptare_ccrypt_normalizat} MB RAM/kB procesați \n
-Mcrypt criptare: {timp_criptare_mcrypt_normalizat} ms/kB procesati {ram_consumat_criptare_mcrypt_normalizat} MB RAM/kB procesați \n 
-Mcrypt decriptare: {timp_decriptare_ccrypt_normalizat} ms/kB procesati {ram_consumat_decriptare_ccrypt_normalizat} MB RAM/kB procesați \n
-        """)
+        timp_decriptare_mcrypt_normalizat, ram_consumat_decriptare_mcrypt_normalizat= evaluare_performanta(mcrypt_decriptate_aes256)       
+        frameworks = ['OpenSSL', 'ccrypt', 'mcrypt']
+        timp_criptare = [timp_criptare_open_ssl_normalizat, timp_criptare_ccrypt_normalizat, timp_criptare_mcrypt_normalizat]
+        timp_decriptare = [timp_decriptare_open_ssl_normalizat, timp_decriptare_ccrypt_normalizat, timp_decriptare_mcrypt_normalizat]
+        ram_consumat_criptare = [ram_consumat_criptare_open_ssl_normalizat, ram_consumat_criptare_ccrypt_normalizat, ram_consumat_criptare_mcrypt_normalizat]
+        ram_consumat_decriptare = [ram_consumat_decriptare_open_ssl_normalizat, ram_consumat_decriptare_ccrypt_normalizat, ram_consumat_decriptare_mcrypt_normalizat]
+        fig, axs = plt.subplots(2, 2, figsize=(12, 10))
+        axs[0, 0].bar(frameworks, timp_criptare, color='blue')
+        axs[0, 0].set_xlabel('Framework-uri')
+        axs[0, 0].set_ylabel('Timp normalizat (ms/kB)')
+        axs[0, 0].set_title('Timpul de criptare AES256 normalizat')
+        axs[0, 1].bar(frameworks, timp_decriptare, color='orange')
+        axs[0, 1].set_xlabel('Framework-uri')
+        axs[0, 1].set_ylabel('Timp normalizat (ms/kB)')
+        axs[0, 1].set_title('Timpul de decriptare AES256 normalizat')
+        axs[1, 0].bar(frameworks, ram_consumat_criptare, color='green')
+        axs[1, 0].set_xlabel('Framework-uri')
+        axs[1, 0].set_ylabel('Memorie consumată normalizată (MB RAM/kB spațiu)')
+        axs[1, 0].set_title('Memoria consumată în timpul criptării AES256 normalizată')
+        axs[1, 1].bar(frameworks, ram_consumat_decriptare, color='red')
+        axs[1, 1].set_xlabel('Framework-uri')
+        axs[1, 1].set_ylabel('Memorie consumată normalizată (MB RAM/kB spațiu)')
+        axs[1, 1].set_title('Memoria consumată în timpul decriptării AES256 normalizată')      
+        graph_window = GraphWindow(fig,self)
+        graph_window.show()
 def main():
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
