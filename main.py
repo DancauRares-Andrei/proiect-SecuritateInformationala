@@ -12,7 +12,7 @@ from main_window_ui import Ui_Dialog
 OPENSSL_SYM = ["AES128", "AES192", "AES256"]
 CCRYPT_SYM = ["AES256"]
 MCRYPT_SYM = ["AES256", "CAST128", "CAST256"]#AES256=rijdael-256
-
+#RSA512->OpenSSL
 def asimetrica(cheie):
     if " " in cheie:
         return True
@@ -28,6 +28,17 @@ def calculate_md5(file_path):
 def copiaza_continut(fisier_sursa, fisier_destinatie):
     shutil.copy(fisier_sursa, fisier_destinatie)
     os.remove(fisier_sursa)
+def evaluare_performanta(fisiere):
+    timp=0
+    ram_consumat=0
+    dim_fisiere=0
+    for fisier in fisiere:
+        timp+=float(fisier.Timp)
+        ram_consumat+=float(fisier.UsedRAM[:-2])
+        dim_fisiere+=float(fisier.DimFisier[:-2])
+    timp/=dim_fisiere#timp in ms normalizat la dimensiunea fisierelor
+    ram_consumat/=dim_fisiere#MB RAM consumati normalizat la dimensiunea fisierelor
+    return round(timp,4),round(ram_consumat,4)
 class MainWindow(QtWidgets.QDialog):
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -327,23 +338,25 @@ class MainWindow(QtWidgets.QDialog):
                 except Fisiere.DoesNotExist:
                     pass
                 file_hash=calculate_md5(file_path)
+                file_stats = os.stat(file_path)
+                dim_file_kb=file_stats.st_size / 1024
                 if framework=="OpenSSL":
                     if nume=="AES128":
-                        openssl_command = [
+                        encrypt_command = [
                             "openssl", "enc", "-aes128", "-pbkdf2",
                             "-in", file_path,
                             "-out", file_path+'.temp',
                             "-pass", "pass:"+cheie_criptare
                         ]
                     elif nume=="AES192":
-                        openssl_command = [
+                        encrypt_command = [
                             "openssl", "enc", "-aes192", "-pbkdf2",
                             "-in", file_path,
                             "-out", file_path+'.temp',
                             "-pass", "pass:"+cheie_criptare
                         ]
                     elif nume=="AES256":
-                        openssl_command = [
+                        encrypt_command = [
                             "openssl", "enc", "-aes256", "-pbkdf2",
                             "-in", file_path,
                             "-out", file_path+'.temp',
@@ -354,80 +367,55 @@ class MainWindow(QtWidgets.QDialog):
                             file_pubkey.write("-----BEGIN PUBLIC KEY-----\n")
                             file_pubkey.write(cheie_criptare+"\n")
                             file_pubkey.write("-----END PUBLIC KEY-----\n")
-                         openssl_command = [
+                         encrypt_command = [
                             "openssl", "pkeyutl", "-encrypt", "-inkey",
                             file_path+".cheie_pub","-pubin",
                             "-in",file_path,
                             "-out", file_path+'.temp',
                         ]
-                    start_time = time.time()
-                    completed_process = subprocess.run(openssl_command, check=True)
-                    end_time = time.time()
-                    duration_ms = (end_time - start_time) * 1000 
-                    if completed_process.returncode != 0:
-                        QMessageBox.warning(self, "Avertisment", f"A apărut o eroare la criptarea fișierului! Cod:{completed_process.returncode}", QMessageBox.Ok)
-                        return
-                    copiaza_continut(file_path+'.temp',file_path)
-                    file_e=Fisiere.create(
-                    AlgoritmID = algoritm_e,
-                    Cale = file_path,
-                    Criptat = True,
-                    Timp = duration_ms,
-                    Hash = str(file_hash),
-                    UsedRAM = str(psutil.Process().memory_info().rss / (1024 * 1024))+"MB"
-                    )
-                    if nume=="RSA512":
-                        os.remove(file_path+".cheie_pub")
-                    self.init_list_widget_file()
-                elif framework=="Ccrypt" and nume=="AES256":
-                    ccrypt_command = [
-                            "ccrypt", "-e", "-K", cheie_criptare,
-                            file_path,
-                        ]
-                    start_time = time.time()
-                    completed_process = subprocess.run(ccrypt_command, check=True)
-                    end_time = time.time()
-                    duration_ms = (end_time - start_time) * 1000 
-                    if completed_process.returncode != 0:
-                        QMessageBox.warning(self, "Avertisment", f"A apărut o eroare la criptarea fișierului! Cod:{completed_process.returncode}", QMessageBox.Ok)
-                        return
-                    copiaza_continut(file_path+'.cpt',file_path)
-                    file_e=Fisiere.create(
-                    AlgoritmID = algoritm_e,
-                    Cale = file_path,
-                    Criptat = True,
-                    Timp = duration_ms,
-                    Hash = str(file_hash),
-                    UsedRAM = str(psutil.Process().memory_info().rss / (1024 * 1024))+"MB"
-                    )
-                    self.init_list_widget_file()    
                 elif framework=="Mcrypt":
                     if nume == "AES256":
-                        mcrypt_command = [
+                        encrypt_command = [
                             "mcrypt", "-m", "cbc","-k" , cheie_criptare, "-a","rijndael-256" ,file_path,"--flush","-q"
                         ]
                     elif nume == "CAST128":
-                        mcrypt_command = [
+                        encrypt_command = [
                             "mcrypt", "-m", "cbc","-k" , cheie_criptare, "-a","cast-128" ,file_path,"--flush","-q"
                         ]
                     elif nume == "CAST256":
-                        mcrypt_command = [
+                        encrypt_command = [
                             "mcrypt", "-m", "cbc","-k" , cheie_criptare, "-a","cast-256" ,file_path,"--flush","-q"
-                        ]
-                    start_time = time.time()
-                    completed_process = subprocess.run(mcrypt_command, check=True)
-                    end_time = time.time()
-                    duration_ms = (end_time - start_time) * 1000    
+                        ]    
+                elif framework=="Ccrypt" and nume=="AES256":
+                    encrypt_command = [
+                            "ccrypt", "-e", "-K", cheie_criptare,
+                            file_path,
+                        ]            
+                start_time = time.time()
+                completed_process = subprocess.run(encrypt_command, check=True)
+                end_time = time.time()
+                duration_ms = (end_time - start_time) * 1000 
+                if completed_process.returncode != 0:
+                    QMessageBox.warning(self, "Avertisment", f"A apărut o eroare la criptarea fișierului! Cod:{completed_process.returncode}", QMessageBox.Ok)
+                    return
+                if framework=="OpenSSL":
+                    copiaza_continut(file_path+'.temp',file_path)
+                    if nume=="RSA512":
+                        os.remove(file_path+".cheie_pub")
+                elif framework=="Ccrypt":
+                    copiaza_continut(file_path+'.cpt',file_path)
+                elif framework=="Mcrypt":
                     copiaza_continut(file_path+'.nc',file_path)
-                    file_e=Fisiere.create(
-                    AlgoritmID = algoritm_e,
-                    Cale = file_path,
-                    Criptat = True,
-                    Timp = duration_ms,
-                    Hash = str(file_hash),
-                    UsedRAM = str(psutil.Process().memory_info().rss / (1024 * 1024))+"MB"
-                    )
-                    self.init_list_widget_file()         
+                file_e=Fisiere.create(
+                AlgoritmID = algoritm_e,
+                Cale = file_path,
+                Criptat = True,
+                Timp = duration_ms,
+                Hash = str(file_hash),
+                UsedRAM = str(psutil.Process().memory_info().rss / (1024 * 1024))+"MB",
+                DimFisier = str(dim_file_kb)+"kB"
+                )                
+                self.init_list_widget_file()         
         else:
              QMessageBox.warning(self, "Avertisment", "Nu a fost selectat niciun algoritm de criptare!", QMessageBox.Ok)
     def init_list_widget_file(self):
@@ -440,7 +428,7 @@ class MainWindow(QtWidgets.QDialog):
                 current_val+=fisier.AlgoritmID.CheieID.CheieCriptare+" "
             else:
                 current_val+=fisier.AlgoritmID.CheieID.CheieCriptare+" "+fisier.AlgoritmID.CheieID.CheieDecriptare+" "
-            current_val+=str(fisier.Criptat)+" "+str(fisier.Timp)+"ms MD5:"+fisier.Hash+" "+fisier.UsedRAM+" "+fisier.Cale
+            current_val+=str(fisier.Criptat)+" "+str(fisier.Timp)+"ms MD5:"+fisier.Hash+" "+fisier.UsedRAM+" "+fisier.Cale+" "+fisier.DimFisier
             values.append(current_val)
         self.ui.listWidget_fisiere.addItems(values)
     def pushButton_stergere_fisier_clicked(self):
@@ -452,24 +440,25 @@ class MainWindow(QtWidgets.QDialog):
         nume_algoritm=componente[1]
         framework=componente[2]
         cheie_criptare=componente[3]
+        dim_file=componente[-1]
         if nume_algoritm=="RSA512":
             cheie_decriptare=componente[4]
             criptat=True if componente[5]=="True" else False
             timp=int(componente[6][:-2])
             hash_file=componente[7][4:]
             used_ram=componente[8]
-            file_path=" ".join(componente[9:])
+            file_path=" ".join(componente[9:-1])
         else:
             cheie_decriptare=componente[3]
             criptat=True if componente[4]=="True" else False
             timp=int(componente[5][:-2])
             hash_file=componente[6][4:]
             used_ram=componente[7]
-            file_path=" ".join(componente[8:])
+            file_path=" ".join(componente[8:-1])
         framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
         cheie_e=Chei.get((Chei.CheieCriptare == cheie_criptare)&(Chei.CheieDecriptare == cheie_decriptare))
         algoritm_e=Algoritmi.get((Algoritmi.CheieID==cheie_e) & (Algoritmi.FrameworkID==framework_e) & (Algoritmi.Nume == nume_algoritm))
-        fisier_e=Fisiere.get((Fisiere.AlgoritmID==algoritm_e) & (Fisiere.Cale==file_path) & (Fisiere.Criptat==criptat) & (Fisiere.Timp==timp) & (Fisiere.Hash==hash_file) & (Fisiere.UsedRAM==used_ram))
+        fisier_e=Fisiere.get((Fisiere.AlgoritmID==algoritm_e) & (Fisiere.Cale==file_path) & (Fisiere.Criptat==criptat) & (Fisiere.Timp==timp) & (Fisiere.Hash==hash_file) & (Fisiere.UsedRAM==used_ram) & (Fisiere.DimFisier == dim_file))
         fisier_e.delete_instance()
         self.init_list_widget_file()
     def pushButton_decriptare_clicked(self):
@@ -482,44 +471,46 @@ class MainWindow(QtWidgets.QDialog):
             nume_algoritm=componente[1]
             framework=componente[2]
             cheie_criptare=componente[3]
+            dim_file=componente[-1]
             if nume_algoritm=="RSA512":
                 cheie_decriptare=componente[4]
                 criptat=True if componente[5]=="True" else False
                 timp=int(componente[6][:-2])
                 hash_file=componente[7][4:]
                 used_ram=componente[8]
-                file_path=" ".join(componente[9:])
+                file_path=" ".join(componente[9:-1])
             else:
                 cheie_decriptare=componente[3]
                 criptat=True if componente[4]=="True" else False
                 timp=int(componente[5][:-2])
                 hash_file=componente[6][4:]
                 used_ram=componente[7]
-                file_path=" ".join(componente[8:])
+                file_path=" ".join(componente[8:-1])
+                
             if criptat==False:
                 QMessageBox.warning(self, "Avertisment", "Fișierul este deja decriptat!", QMessageBox.Ok)
                 return
             framework_e=Frameworkuri.get(Frameworkuri.Nume == framework)
             cheie_e=Chei.get((Chei.CheieCriptare == cheie_criptare)&(Chei.CheieDecriptare == cheie_decriptare))
             algoritm_e=Algoritmi.get((Algoritmi.CheieID==cheie_e) & (Algoritmi.FrameworkID==framework_e) & (Algoritmi.Nume == nume_algoritm))
-            fisier_e=Fisiere.get((Fisiere.AlgoritmID==algoritm_e) & (Fisiere.Cale==file_path) & (Fisiere.Criptat==criptat) & (Fisiere.Timp==timp) & (Fisiere.Hash==hash_file) & (Fisiere.UsedRAM==used_ram))
+            fisier_e=Fisiere.get((Fisiere.AlgoritmID==algoritm_e) & (Fisiere.Cale==file_path) & (Fisiere.Criptat==criptat) & (Fisiere.Timp==timp) & (Fisiere.Hash==hash_file) & (Fisiere.UsedRAM==used_ram) & (Fisiere.DimFisier == dim_file))
             if framework=="OpenSSL":
                 if nume_algoritm=="AES128":
-                    openssl_command = [
+                    decrypt_command = [
                         "openssl", "enc", "-aes128", "-pbkdf2","-d",
                         "-in", file_path,
                         "-out", file_path+'.temp',
                         "-pass", "pass:"+cheie_criptare
                     ]
                 elif nume_algoritm=="AES192":
-                    openssl_command = [
+                    decrypt_command = [
                         "openssl", "enc", "-aes192", "-pbkdf2","-d",
                         "-in", file_path,
                         "-out", file_path+'.temp',
                         "-pass", "pass:"+cheie_criptare
                     ]
                 elif nume_algoritm=="AES256":
-                    openssl_command = [
+                    decrypt_command = [
                         "openssl", "enc", "-aes256", "-pbkdf2","-d",
                         "-in", file_path,
                         "-out", file_path+'.temp',
@@ -530,67 +521,51 @@ class MainWindow(QtWidgets.QDialog):
                             file_pubkey.write("-----BEGIN PRIVATE KEY-----\n")
                             file_pubkey.write(cheie_decriptare+"\n")
                             file_pubkey.write("-----END PRIVATE KEY-----\n")
-                    openssl_command = [
+                    decrypt_command = [
                         "openssl", "pkeyutl", "-decrypt", "-inkey",
                         file_path+".cheie_priv",
                         "-in",file_path,
                         "-out", file_path+'.temp',
-                    ]  
-                start_time = time.time()
-                completed_process = subprocess.run(openssl_command, check=True)
-                end_time = time.time()
-                duration_ms = (end_time - start_time) * 1000
-                if completed_process.returncode != 0:
-                    QMessageBox.warning(self, "Avertisment", f"A apărut o eroare la decriptarea fișierului! Cod:{completed_process.returncode}", QMessageBox.Ok)
-                    return
-                copiaza_continut(file_path+'.temp',file_path)
-                fisier_e.Criptat=False
-                fisier_e.Timp=duration_ms
-                fisier_e.UsedRAM=str(psutil.Process().memory_info().rss / (1024 * 1024))+"MB"
-                fisier_e.save()
-                if nume_algoritm=="RSA512":
-                        os.remove(file_path+".cheie_priv")
-                self.init_list_widget_file()
-            elif framework=="Ccrypt" and nume_algoritm=="AES256":
-                ccrypt_command = [
-                        "ccrypt", "-d", "-K", cheie_criptare,
-                        file_path,
-                    ]
-                start_time = time.time()
-                completed_process = subprocess.run(ccrypt_command, check=True)
-                end_time = time.time()
-                duration_ms = (end_time - start_time) * 1000 
-                if completed_process.returncode != 0:
-                    QMessageBox.warning(self, "Avertisment", f"A apărut o eroare la criptarea fișierului! Cod:{completed_process.returncode}", QMessageBox.Ok)
-                    return
-                fisier_e.Criptat=False
-                fisier_e.Timp=duration_ms
-                fisier_e.UsedRAM=str(psutil.Process().memory_info().rss / (1024 * 1024))+"MB"
-                fisier_e.save()
-                self.init_list_widget_file()    
+                    ] 
             elif framework=="Mcrypt":
                 if nume_algoritm=="AES256":
-                    mcrypt_command = [
+                    decrypt_command = [
                             "mcrypt", "-d", "-m", "cbc","-k" , cheie_criptare, "-a","rijndael-256" ,file_path,"--flush","-q"
                         ]
                 elif nume_algoritm == "CAST128":
-                    mcrypt_command = [
+                    decrypt_command = [
                             "mcrypt", "-d", "-m", "cbc","-k" , cheie_criptare, "-a","cast-128" ,file_path,"--flush","-q"
                         ]
                 elif nume_algoritm == "CAST256":
-                    mcrypt_command = [
+                    decrypt_command = [
                             "mcrypt", "-d", "-m", "cbc","-k" , cheie_criptare, "-a","cast-256" ,file_path,"--flush","-q"
-                        ] 
-                start_time = time.time()
-                completed_process = subprocess.run(mcrypt_command, check=True)
-                end_time = time.time()
-                duration_ms = (end_time - start_time) * 1000
+                        ]
+            elif framework=="Ccrypt" and nume_algoritm=="AES256":
+                decrypt_command = [
+                        "ccrypt", "-d", "-K", cheie_criptare,
+                        file_path,
+                    ]                      
+            file_stats = os.stat(file_path)
+            dim_file_kb=file_stats.st_size / 1024
+            start_time = time.time()
+            completed_process = subprocess.run(decrypt_command, check=True)
+            end_time = time.time()
+            duration_ms = (end_time - start_time) * 1000
+            if completed_process.returncode != 0:
+                QMessageBox.warning(self, "Avertisment", f"A apărut o eroare la decriptarea fișierului! Cod:{completed_process.returncode}", QMessageBox.Ok)
+                return
+            if framework=="OpenSSL":
+                copiaza_continut(file_path+'.temp',file_path)
+            elif framework=="Mcrypt":
                 copiaza_continut(file_path+'.dc',file_path)
-                fisier_e.Criptat=False
-                fisier_e.Timp=duration_ms
-                fisier_e.UsedRAM=str(psutil.Process().memory_info().rss / (1024 * 1024))+"MB"
-                fisier_e.save()
-                self.init_list_widget_file()           
+            fisier_e.Criptat=False
+            fisier_e.Timp=duration_ms
+            fisier_e.UsedRAM=str(psutil.Process().memory_info().rss / (1024 * 1024))+"MB"
+            fisier_e.DimFisier = str(dim_file_kb)+"kB"
+            fisier_e.save()
+            if framework=="OpenSSL" and nume_algoritm=="RSA512":
+                    os.remove(file_path+".cheie_priv")
+            self.init_list_widget_file()         
         except Fisiere.DoesNotExist:
                 QMessageBox.warning(self, "Avertisment", "Nu am putut decripta(fisier negasit)!", QMessageBox.Ok)    
     def pushButton_evaluare_performante_clicked(self):
@@ -618,55 +593,19 @@ class MainWindow(QtWidgets.QDialog):
         if len(mcrypt_decriptate_aes256)==0:
             QMessageBox.warning(self, "Avertisment", "Pentru a compara framework-urile, trebuie să existe un fișier decriptat cu AES256 și Mcrypt", QMessageBox.Ok)
             return
-        timp_criptare_open_ssl=0
-        ram_consumat_criptare_open_ssl=0
-        for fisier in open_ssl_criptate_aes256:
-            timp_criptare_open_ssl+=float(fisier.Timp)
-            ram_consumat_criptare_open_ssl+=float(fisier.UsedRAM[:-2])
-        timp_criptare_open_ssl/=len(open_ssl_criptate_aes256)
-        ram_consumat_criptare_open_ssl/=len(open_ssl_criptate_aes256)
-        timp_decriptare_open_ssl=0
-        ram_consumat_decriptare_open_ssl=0
-        for fisier in open_ssl_decriptate_aes256:
-            timp_decriptare_open_ssl+=float(fisier.Timp)
-            ram_consumat_decriptare_open_ssl+=float(fisier.UsedRAM[:-2])
-        timp_decriptare_open_ssl/=len(open_ssl_decriptate_aes256)
-        ram_consumat_decriptare_open_ssl/=len(open_ssl_decriptate_aes256)
-        timp_criptare_ccrypt=0
-        ram_consumat_criptare_ccrypt=0
-        for fisier in ccrypt_criptate_aes256:
-            timp_criptare_ccrypt+=float(fisier.Timp)
-            ram_consumat_criptare_ccrypt+=float(fisier.UsedRAM[:-2])
-        timp_criptare_ccrypt/=len(ccrypt_criptate_aes256)
-        ram_consumat_criptare_ccrypt/=len(ccrypt_criptate_aes256)
-        timp_decriptare_ccrypt=0
-        ram_consumat_decriptare_ccrypt=0
-        for fisier in ccrypt_decriptate_aes256:
-            timp_decriptare_ccrypt+=float(fisier.Timp)
-            ram_consumat_decriptare_ccrypt+=float(fisier.UsedRAM[:-2])
-        timp_decriptare_ccrypt/=len(ccrypt_decriptate_aes256)
-        ram_consumat_decriptare_ccrypt/=len(ccrypt_decriptate_aes256)
-        timp_criptare_mcrypt=0
-        ram_consumat_criptare_mcrypt=0
-        for fisier in mcrypt_criptate_aes256:
-            timp_criptare_mcrypt+=float(fisier.Timp)
-            ram_consumat_criptare_mcrypt+=float(fisier.UsedRAM[:-2])
-        timp_criptare_mcrypt/=len(mcrypt_criptate_aes256)
-        ram_consumat_criptare_mcrypt/=len(mcrypt_criptate_aes256)
-        timp_decriptare_mcrypt=0
-        ram_consumat_decriptare_mcrypt=0
-        for fisier in mcrypt_decriptate_aes256:
-            timp_decriptare_mcrypt+=float(fisier.Timp)
-            ram_consumat_decriptare_mcrypt+=float(fisier.UsedRAM[:-2])
-        timp_decriptare_mcrypt/=len(mcrypt_decriptate_aes256)
-        ram_consumat_decriptare_mcrypt/=len(mcrypt_decriptate_aes256)
+        timp_criptare_open_ssl_normalizat, ram_consumat_criptare_open_ssl_normalizat = evaluare_performanta(open_ssl_criptate_aes256)
+        timp_decriptare_open_ssl_normalizat, ram_consumat_decriptare_open_ssl_normalizat = evaluare_performanta(open_ssl_decriptate_aes256)
+        timp_criptare_ccrypt_normalizat, ram_consumat_criptare_ccrypt_normalizat = evaluare_performanta(ccrypt_criptate_aes256)
+        timp_decriptare_ccrypt_normalizat, ram_consumat_decriptare_ccrypt_normalizat = evaluare_performanta(ccrypt_decriptate_aes256)
+        timp_criptare_mcrypt_normalizat, ram_consumat_criptare_mcrypt_normalizat = evaluare_performanta(mcrypt_criptate_aes256)
+        timp_decriptare_ccrypt_normalizat, ram_consumat_decriptare_ccrypt_normalizat= evaluare_performanta(mcrypt_decriptate_aes256)
         QMessageBox.information(None, "Parametri medii", f"""
-OpenSSL criptare: {timp_criptare_open_ssl} ms/fișier {ram_consumat_criptare_open_ssl} MB/fișier \n 
-OpenSSL decriptare: {timp_decriptare_open_ssl} ms/fișier {ram_consumat_decriptare_open_ssl} MB/fișier \n
-Ccrypt criptare: {timp_criptare_ccrypt} ms/fișier {ram_consumat_criptare_ccrypt} MB/fișier \n 
-Ccrypt decriptare: {timp_decriptare_ccrypt} ms/fișier {ram_consumat_decriptare_ccrypt} MB/fișier \n
-Mcrypt criptare: {timp_criptare_mcrypt} ms/fișier {ram_consumat_criptare_mcrypt} MB/fișier \n 
-Mcrypt decriptare: {timp_decriptare_mcrypt} ms/fișier {ram_consumat_decriptare_mcrypt} MB/fișier \n
+OpenSSL criptare: {timp_criptare_open_ssl_normalizat} ms/kB procesati {ram_consumat_criptare_open_ssl_normalizat} MB RAM/kB procesați \n 
+OpenSSL decriptare: {timp_decriptare_open_ssl_normalizat} ms/kB procesati {ram_consumat_decriptare_open_ssl_normalizat} MB RAM/kB procesați \n
+Ccrypt criptare: {timp_criptare_ccrypt_normalizat} ms/kB procesati {ram_consumat_criptare_ccrypt_normalizat} MB RAM/kB procesați \n 
+Ccrypt decriptare: {timp_decriptare_ccrypt_normalizat} ms/kB procesati {ram_consumat_decriptare_ccrypt_normalizat} MB RAM/kB procesați \n
+Mcrypt criptare: {timp_criptare_mcrypt_normalizat} ms/kB procesati {ram_consumat_criptare_mcrypt_normalizat} MB RAM/kB procesați \n 
+Mcrypt decriptare: {timp_decriptare_ccrypt_normalizat} ms/kB procesati {ram_consumat_decriptare_ccrypt_normalizat} MB RAM/kB procesați \n
         """)
 def main():
     app = QtWidgets.QApplication(sys.argv)
@@ -677,4 +616,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
+    

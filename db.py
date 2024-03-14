@@ -26,6 +26,7 @@ class Fisiere(Model):
     Timp = BigIntegerField()#timp stocat ca milisecunde
     Hash = CharField(max_length=65)
     UsedRAM = CharField(max_length=20)#Stocat ca valoare numerica urmata de MB
+    DimFisier = CharField(max_length=20)#Valoarea stocată în kB
     class Meta:
         database = db
 db.connect()
