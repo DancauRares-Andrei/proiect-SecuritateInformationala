@@ -47,7 +47,6 @@ class GraphWindow(QDialog):
         self.setWindowTitle('Grafice Performanță')
         layout = QVBoxLayout()
         
-        # Adăugare grafic timp
         fig.tight_layout()
         canvas1 = FigureCanvas(fig)
         layout.addWidget(canvas1)

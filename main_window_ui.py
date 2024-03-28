@@ -113,7 +113,7 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "ProiectSI"))
+        Dialog.setWindowTitle(_translate("Dialog", "CryptoPerf"))
         self.label_cheie.setText(_translate("Dialog", "Chei/Perechi disponibile:"))
         self.pushButton_evaluare_performante.setText(_translate("Dialog", "Comparare performanță framework-uri pentru AES256"))
         self.labelAlgo.setText(_translate("Dialog", "Algoritmi disponibili:"))

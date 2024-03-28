@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>ProiectSI</string>
+   <string>CryptoPerf</string>
   </property>
   <widget class="QLabel" name="label_cheie">
    <property name="geometry">
