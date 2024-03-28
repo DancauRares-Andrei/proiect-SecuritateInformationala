@@ -637,6 +637,12 @@ class MainWindow(QtWidgets.QDialog):
         axs[1, 1].set_title('Memoria consumată în timpul decriptării AES256 normalizată')      
         graph_window = GraphWindow(fig,self)
         graph_window.show()
+        print(f"OpenSSL: timp criptare normalizat:{timp_criptare_open_ssl_normalizat}, timp decriptare normalizat:{timp_decriptare_open_ssl_normalizat}")
+        print(f"Ccrypt: timp criptare normalizat:{timp_criptare_ccrypt_normalizat}, timp decriptare normalizat:{timp_decriptare_ccrypt_normalizat}")
+        print(f"Mcrypt: timp criptare normalizat:{timp_criptare_mcrypt_normalizat}, timp decriptare normalizat:{timp_decriptare_mcrypt_normalizat}")
+        print(f"OpenSSL: RAM consumat criptare normalizat:{ram_consumat_criptare_open_ssl_normalizat}, RAM consumat decriptare normalizat:{ram_consumat_decriptare_open_ssl_normalizat}")
+        print(f"Ccrypt: RAM consumat criptare normalizat:{ram_consumat_criptare_ccrypt_normalizat}, RAM consumat decriptare normalizat:{ram_consumat_decriptare_ccrypt_normalizat}")
+        print(f"Mcrypt: RAM consumat criptare normalizat:{ram_consumat_criptare_mcrypt_normalizat}, RAM consumat decriptare normalizat:{ram_consumat_decriptare_mcrypt_normalizat}")
 def main():
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
